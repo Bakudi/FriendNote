@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Friendnote — Panel Admin</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6fb; color: #1a1a2e; min-height: 100vh; }
+
+    nav { background: #1a1a2e; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo { font-size: 18px; font-weight: 700; color: white; text-decoration: none; }
+    .nav-badge { background: #4f46e5; color: white; font-size: 11px; padding: 3px 8px; border-radius: 20px; margin-left: 8px; }
+    .btn-salir { font-size: 13px; color: #aaa; text-decoration: none; transition: color 0.2s; }
+    .btn-salir:hover { color: white; }
+
+    main { max-width: 1000px; margin: 0 auto; padding: 40px 16px; }
+
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .subtitulo { color: #777; font-size: 14px; margin-bottom: 32px; }
+
+    /* ── Métricas ── */
+    .metricas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+
+    .metrica-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .metrica-icono { font-size: 28px; margin-bottom: 8px; }
+    .metrica-numero { font-size: 32px; font-weight: 700; color: #4f46e5; margin-bottom: 4px; }
+    .metrica-label { font-size: 13px; color: #999; }
+
+    /* ── Sección ── */
+    .seccion { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 24px; }
+    .seccion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .seccion-titulo { font-size: 16px; font-weight: 600; }
+
+    /* ── Tabla ── */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; padding: 10px 12px; color: #999; font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f0f0f0; }
+    td { padding: 12px; border-bottom: 1px solid #f8f8f8; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-carrera { background: #eef2ff; color: #4f46e5; }
+    .badge-materia { background: #f0fdf4; color: #16a34a; }
+
+    .btn-eliminar-admin { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 13px; padding: 4px 8px; border-radius: 6px; transition: background 0.2s; }
+    .btn-eliminar-admin:hover { background: #fee2e2; }
+
+    .autor-cell { display: flex; align-items: center; gap: 8px; }
+    .autor-cell img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+
+    /* ── Top apuntes ── */
+    .top-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f8f8f8; }
+    .top-item:last-child { border-bottom: none; }
+    .top-numero { width: 24px; height: 24px; border-radius: 50%; background: #eef2ff; color: #4f46e5; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .top-info { flex: 1; }
+    .top-titulo { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .top-meta { font-size: 12px; color: #999; }
+    .top-stat { font-size: 14px; font-weight: 600; color: #4f46e5; }
+
+    .loading { text-align: center; padding: 40px; color: #999; }
+    .acceso-denegado { text-align: center; padding: 80px 20px; }
+    .acceso-denegado h2 { font-size: 22px; margin-bottom: 8px; color: #dc2626; }
+    .acceso-denegado p { color: #777; margin-bottom: 20px; }
+    .btn-volver { display: inline-block; padding: 10px 20px; background: #4f46e5; color: white; border-radius: 8px; text-decoration: none; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div style="display:flex; align-items:center;">
+      <a class="nav-logo" href="index.html">📚 Friendnote</a>
+      <span class="nav-badge">Admin</span>
+    </div>
+    <a class="btn-salir" href="index.html">← Volver al sitio</a>
+  </nav>
+
+  <main id="contenido">
+    <div class="loading">⏳ Verificando acceso...</div>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const supabase = createClient(
+      'https://ojwnvijcyrddpadyyoce.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qd252aWpjeXJkZHBhZHl5b2NlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0ODUxNzcsImV4cCI6MjA5NTA2MTE3N30.Lg-NuNcwWcI8hwmost-TtJQ0YzlSDTZE2ciL9BtK0yQ'
+    )
+
+    // Email del administrador — cámbialo por el tuyo
+    const ADMIN_EMAIL = 'bakudi25@gmail.com'
+
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { window.location.href = '/login.html'; return }
+
+      // Verificar si es admin
+      if (user.email !== ADMIN_EMAIL) {
+        document.getElementById('contenido').innerHTML = `
+          <div class="acceso-denegado">
+            <h2>🔒 Acceso denegado</h2>
+            <p>No tienes permisos para ver esta página.</p>
+            <a class="btn-volver" href="index.html">Volver al inicio</a>
+          </div>
+        `
+        return
+      }
+
+      // Cargar datos
+      const { data: apuntes } = await supabase
+        .from('apuntes')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      const { data: valoraciones } = await supabase
+        .from('valoraciones')
+        .select('*')
+
+      // Calcular métricas
+      const totalApuntes    = apuntes?.length ?? 0
+      const totalDescargas  = apuntes?.reduce((acc, a) => acc + (a.total_descargas ?? 0), 0) ?? 0
+      const totalValoraciones = valoraciones?.length ?? 0
+      const usuariosUnicos  = [...new Set(apuntes?.map(a => a.usuario_id))].length
+
+      // Top 5 más descargados
+      const topDescargados = [...(apuntes ?? [])]
+        .sort((a, b) => (b.total_descargas ?? 0) - (a.total_descargas ?? 0))
+        .slice(0, 5)
+
+      // Top 5 mejor valorados
+      const topValorados = [...(apuntes ?? [])]
+        .filter(a => a.valoracion_promedio > 0)
+        .sort((a, b) => (b.valoracion_promedio ?? 0) - (a.valoracion_promedio ?? 0))
+        .slice(0, 5)
+
+      document.getElementById('contenido').innerHTML = `
+        <h1>Panel de administración</h1>
+        <p class="subtitulo">Resumen general de la plataforma</p>
+
+        <div class="metricas-grid">
+          <div class="metrica-card">
+            <div class="metrica-icono">📄</div>
+            <div class="metrica-numero">${totalApuntes}</div>
+            <div class="metrica-label">Apuntes subidos</div>
+          </div>
+          <div class="metrica-card">
+            <div class="metrica-icono">⬇️</div>
+            <div class="metrica-numero">${totalDescargas}</div>
+            <div class="metrica-label">Descargas totales</div>
+          </div>
+          <div class="metrica-card">
+            <div class="metrica-icono">⭐</div>
+            <div class="metrica-numero">${totalValoraciones}</div>
+            <div class="metrica-label">Valoraciones</div>
+          </div>
+          <div class="metrica-card">
+            <div class="metrica-icono">👥</div>
+            <div class="metrica-numero">${usuariosUnicos}</div>
+            <div class="metrica-label">Usuarios activos</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+          <div class="seccion">
+            <div class="seccion-header">
+              <div class="seccion-titulo">⬇️ Más descargados</div>
+            </div>
+            ${topDescargados.length === 0
+              ? '<p style="color:#999;font-size:14px;">Sin datos aún</p>'
+              : topDescargados.map((a, i) => `
+                <div class="top-item">
+                  <div class="top-numero">${i + 1}</div>
+                  <div class="top-info">
+                    <div class="top-titulo">${a.titulo}</div>
+                    <div class="top-meta">${a.materia} · ${a.carrera}</div>
+                  </div>
+                  <div class="top-stat">⬇️ ${a.total_descargas ?? 0}</div>
+                </div>
+              `).join('')
+            }
+          </div>
+
+          <div class="seccion">
+            <div class="seccion-header">
+              <div class="seccion-titulo">⭐ Mejor valorados</div>
+            </div>
+            ${topValorados.length === 0
+              ? '<p style="color:#999;font-size:14px;">Sin datos aún</p>'
+              : topValorados.map((a, i) => `
+                <div class="top-item">
+                  <div class="top-numero">${i + 1}</div>
+                  <div class="top-info">
+                    <div class="top-titulo">${a.titulo}</div>
+                    <div class="top-meta">${a.materia} · ${a.carrera}</div>
+                  </div>
+                  <div class="top-stat">⭐ ${a.valoracion_promedio}</div>
+                </div>
+              `).join('')
+            }
+          </div>
+        </div>
+
+        <div class="seccion">
+          <div class="seccion-header">
+            <div class="seccion-titulo">Todos los apuntes</div>
+            <span style="font-size:13px;color:#999;">${totalApuntes} en total</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Materia</th>
+                <th>Carrera</th>
+                <th>⬇️</th>
+                <th>⭐</th>
+                <th>Fecha</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabla-apuntes">
+              ${(apuntes ?? []).map(a => `
+                <tr id="fila-${a.id}">
+                  <td><a href="detalle.html?id=${a.id}" style="color:#4f46e5;text-decoration:none;font-weight:500;">${a.titulo}</a></td>
+                  <td>
+                    <div class="autor-cell">
+                      <img src="${a.usuario_avatar ?? `https://ui-avatars.com/api/?name=${a.usuario_nombre}`}" alt="${a.usuario_nombre}"/>
+                      ${a.usuario_nombre}
+                    </div>
+                  </td>
+                  <td><span class="badge badge-materia">${a.materia}</span></td>
+                  <td><span class="badge badge-carrera">${a.carrera}</span></td>
+                  <td>${a.total_descargas ?? 0}</td>
+                  <td>${a.valoracion_promedio ?? '—'}</td>
+                  <td>${new Date(a.created_at).toLocaleDateString('es-CO')}</td>
+                  <td>
+                    <button class="btn-eliminar-admin" onclick="eliminarApunte('${a.id}')">🗑️ Eliminar</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `
+    }
+
+    // Eliminar apunte desde admin
+    window.eliminarApunte = async (id) => {
+      if (!confirm('¿Eliminar este apunte? Esta acción no se puede deshacer.')) return
+      const { error } = await supabase.from('apuntes').delete().eq('id', id)
+      if (!error) {
+        document.getElementById(`fila-${id}`)?.remove()
+      } else {
+        alert('Error al eliminar: ' + error.message)
+      }
+    }
+
+    init()
+  </script>
+
+</body>
+</html>

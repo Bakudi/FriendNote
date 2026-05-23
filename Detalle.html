@@ -37,6 +37,16 @@
     .pdf-preview { width: 100%; height: 500px; border: none; border-radius: 10px; background: #f4f6fb; }
     .loading { text-align: center; padding: 80px 20px; color: #999; font-size: 15px; }
     .error-msg { text-align: center; padding: 80px 20px; color: #dc2626; font-size: 15px; }
+
+    /* ── Propinas ── */
+    .propina-section { margin-bottom: 12px; padding: 16px; background: #fafafa; border-radius: 10px; border: 1px solid #f0f0f0; }
+    .propina-label { font-size: 13px; color: #777; margin-bottom: 10px; }
+    .propina-btns { display: flex; gap: 8px; }
+    .btn-propina { flex: 1; padding: 10px; border: 1.5px solid #4f46e5; border-radius: 8px; background: white; color: #4f46e5; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+    .btn-propina:hover { background: #4f46e5; color: white; }
+    .msg-propina { display: none; margin-top: 8px; padding: 8px 12px; border-radius: 8px; font-size: 13px; }
+    .msg-propina.exito { display: block; background: #dcfce7; color: #16a34a; }
+    .msg-propina.error { display: block; background: #fee2e2; color: #dc2626; }
   </style>
 </head>
 <body>
@@ -59,16 +69,13 @@
     )
 
     async function init() {
-      // Verificar sesión
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { window.location.href = '/login.html'; return }
 
-      // Obtener ID del apunte desde la URL
       const params = new URLSearchParams(window.location.search)
       const id = params.get('id')
       if (!id) { window.location.href = '/index.html'; return }
 
-      // Cargar apunte
       const { data: apunte, error } = await supabase
         .from('apuntes')
         .select('*')
@@ -82,7 +89,6 @@
 
       const esDueno = user.id === apunte.usuario_id
 
-      // Renderizar contenido
       document.getElementById('contenido').innerHTML = `
         <div class="card">
           <span class="badge-materia">${apunte.materia}</span>
@@ -98,9 +104,23 @@
             <div class="meta-item">⬇️ ${apunte.total_descargas ?? 0} descargas</div>
             <div class="meta-item">📅 ${new Date(apunte.created_at).toLocaleDateString('es-CO')}</div>
           </div>
+
           <a class="btn-descargar" href="${apunte.archivo_url}" target="_blank" id="btn-descargar">
             ⬇️ Descargar apunte
           </a>
+
+          ${!esDueno ? `
+            <div class="propina-section">
+              <div class="propina-label">🎁 ¿Te fue muy útil? Dale una propina al autor:</div>
+              <div class="propina-btns">
+                <button class="btn-propina" data-monto="500">$500</button>
+                <button class="btn-propina" data-monto="1000">$1.000</button>
+                <button class="btn-propina" data-monto="2000">$2.000</button>
+              </div>
+              <div class="msg-propina" id="msg-propina"></div>
+            </div>
+          ` : ''}
+
           <button class="btn-eliminar ${esDueno ? 'visible' : ''}" id="btn-eliminar">
             🗑️ Eliminar apunte
           </button>
@@ -139,6 +159,50 @@
         const { error } = await supabase.from('apuntes').delete().eq('id', id)
         if (!error) window.location.href = '/index.html'
       })
+
+      // ── Propinas ──
+      if (!esDueno) {
+        document.querySelectorAll('.btn-propina').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const monto = parseInt(btn.dataset.monto)
+            const msgEl = document.getElementById('msg-propina')
+
+            // Obtener o crear saldo del autor
+            let { data: saldoAutor } = await supabase
+              .from('saldos')
+              .select('*')
+              .eq('usuario_id', apunte.usuario_id)
+              .single()
+
+            if (!saldoAutor) {
+              await supabase.from('saldos').insert([{
+                usuario_id: apunte.usuario_id,
+                saldo_total: monto,
+                saldo_disponible: monto
+              }])
+            } else {
+              await supabase.from('saldos').update({
+                saldo_total: saldoAutor.saldo_total + monto,
+                saldo_disponible: saldoAutor.saldo_disponible + monto
+              }).eq('usuario_id', apunte.usuario_id)
+            }
+
+            // Registrar transacción
+            await supabase.from('transacciones').insert([{
+              usuario_id: apunte.usuario_id,
+              apunte_id: apunte.id,
+              tipo: 'propina',
+              monto,
+              descripcion: `Propina por "${apunte.titulo}"`
+            }])
+
+            // Deshabilitar botones tras propina
+            document.querySelectorAll('.btn-propina').forEach(b => b.disabled = true)
+            msgEl.textContent = `✅ ¡Propina de $${monto.toLocaleString('es-CO')} COP enviada!`
+            msgEl.className = 'msg-propina exito'
+          })
+        })
+      }
 
       // ── Sistema de estrellas ──
       let estrellaSeleccionada = 0

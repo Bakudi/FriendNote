@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Friendnote — Ganancias</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6fb; color: #1a1a2e; min-height: 100vh; }
+    nav { background: white; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
+    .nav-logo { font-size: 20px; font-weight: 700; color: #4f46e5; text-decoration: none; }
+    .btn-volver { font-size: 14px; color: #4f46e5; text-decoration: none; }
+
+    main { max-width: 720px; margin: 0 auto; padding: 40px 16px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .subtitulo { color: #777; font-size: 14px; margin-bottom: 32px; }
+
+    /* ── Saldo ── */
+    .saldo-card { background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 16px; padding: 32px; color: white; margin-bottom: 24px; }
+    .saldo-label { font-size: 14px; opacity: 0.8; margin-bottom: 8px; }
+    .saldo-monto { font-size: 48px; font-weight: 700; margin-bottom: 4px; }
+    .saldo-sub { font-size: 13px; opacity: 0.7; margin-bottom: 24px; }
+    .btn-retirar { background: white; color: #4f46e5; border: none; padding: 12px 28px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    .btn-retirar:hover { opacity: 0.9; }
+    .btn-retirar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Info bonos ── */
+    .bonos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .bono-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
+    .bono-icono { font-size: 28px; margin-bottom: 8px; }
+    .bono-monto { font-size: 22px; font-weight: 700; color: #4f46e5; margin-bottom: 4px; }
+    .bono-label { font-size: 13px; color: #777; }
+
+    /* ── Historial ── */
+    .seccion { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 24px; }
+    .seccion-titulo { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+
+    .transaccion-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f4f4f4; }
+    .transaccion-item:last-child { border-bottom: none; }
+    .transaccion-info { display: flex; align-items: center; gap: 12px; }
+    .transaccion-icono { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .icono-propina { background: #dcfce7; }
+    .icono-descarga { background: #eef2ff; }
+    .icono-retiro { background: #fee2e2; }
+    .transaccion-desc { font-size: 14px; font-weight: 500; }
+    .transaccion-fecha { font-size: 12px; color: #999; margin-top: 2px; }
+    .transaccion-monto { font-size: 15px; font-weight: 600; }
+    .monto-positivo { color: #16a34a; }
+    .monto-negativo { color: #dc2626; }
+
+    /* ── Modal retiro ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.visible { display: flex; }
+    .modal { background: white; border-radius: 16px; padding: 32px; width: 100%; max-width: 420px; margin: 16px; }
+    .modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .modal p { color: #777; font-size: 14px; margin-bottom: 24px; }
+    .modal label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+    .modal input, .modal select { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; margin-bottom: 16px; outline: none; }
+    .modal input:focus, .modal select:focus { border-color: #4f46e5; }
+    .modal-btns { display: flex; gap: 10px; }
+    .btn-confirmar { flex: 1; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .btn-cancelar { flex: 1; padding: 12px; background: white; color: #555; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; cursor: pointer; }
+
+    .mensaje { display: none; border-radius: 10px; padding: 12px 16px; font-size: 14px; margin-top: 16px; }
+    .mensaje.exito { display: block; background: #dcfce7; color: #16a34a; }
+    .mensaje.error { display: block; background: #fee2e2; color: #dc2626; }
+
+    .loading { text-align: center; padding: 60px 20px; color: #999; }
+    .vacio { text-align: center; padding: 40px 20px; color: #999; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">📚 Friendnote</a>
+    <a class="btn-volver" href="perfil.html">← Mi perfil</a>
+  </nav>
+
+  <main id="contenido">
+    <div class="loading">⏳ Cargando ganancias...</div>
+  </main>
+
+  <!-- Modal retiro -->
+  <div class="modal-overlay" id="modal-retiro">
+    <div class="modal">
+      <h2>💸 Solicitar retiro</h2>
+      <p>El monto mínimo de retiro es $10.000 COP. Se procesará en 1-3 días hábiles.</p>
+      <label>Método de pago</label>
+      <select id="metodo-pago">
+        <option value="nequi">Nequi</option>
+        <option value="bancolombia">Bancolombia</option>
+        <option value="daviplata">Daviplata</option>
+      </select>
+      <label>Número de cuenta / celular</label>
+      <input type="text" id="numero-cuenta" placeholder="Ej: 300 123 4567"/>
+      <label>Monto a retirar (COP)</label>
+      <input type="number" id="monto-retiro" placeholder="Mínimo $10.000"/>
+      <div id="msg-retiro" class="mensaje"></div>
+      <div class="modal-btns">
+        <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+        <button class="btn-confirmar" onclick="confirmarRetiro()">Confirmar retiro</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const supabase = createClient(
+      'https://ojwnvijcyrddpadyyoce.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qd252aWpjeXJkZHBhZHl5b2NlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0ODUxNzcsImV4cCI6MjA5NTA2MTE3N30.Lg-NuNcwWcI8hwmost-TtJQ0YzlSDTZE2ciL9BtK0yQ'
+    )
+
+    // Bonos por acción
+    const BONO_DESCARGA   = 50   // COP por cada descarga
+    const BONO_VALORACION = 100  // COP por cada valoración 4-5 estrellas
+    const MINIMO_RETIRO   = 10000
+
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { window.location.href = '/login.html'; return }
+
+      // Obtener o crear saldo
+      let { data: saldo } = await supabase
+        .from('saldos')
+        .select('*')
+        .eq('usuario_id', user.id)
+        .single()
+
+      if (!saldo) {
+        const { data: nuevo } = await supabase
+          .from('saldos')
+          .insert([{ usuario_id: user.id, saldo_total: 0, saldo_disponible: 0 }])
+          .select()
+          .single()
+        saldo = nuevo
+      }
+
+      // Obtener transacciones
+      const { data: transacciones } = await supabase
+        .from('transacciones')
+        .select('*')
+        .eq('usuario_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+      // Obtener mis apuntes para calcular estadísticas
+      const { data: apuntes } = await supabase
+        .from('apuntes')
+        .select('titulo, total_descargas, valoracion_promedio')
+        .eq('usuario_id', user.id)
+
+      const totalDescargas = apuntes?.reduce((acc, a) => acc + (a.total_descargas ?? 0), 0) ?? 0
+      const ganadasPorDescargas   = totalDescargas * BONO_DESCARGA
+      const ganadasPorValoraciones = (transacciones ?? []).filter(t => t.tipo === 'propina').reduce((acc, t) => acc + t.monto, 0)
+
+      // Exponer a window para el modal
+      window._supabase = supabase
+      window._user = user
+      window._saldo = saldo
+      window._MINIMO_RETIRO = MINIMO_RETIRO
+
+      document.getElementById('contenido').innerHTML = `
+        <h1>💰 Mis ganancias</h1>
+        <p class="subtitulo">Tus ingresos por compartir apuntes de calidad</p>
+
+        <div class="saldo-card">
+          <div class="saldo-label">Saldo disponible</div>
+          <div class="saldo-monto" id="saldo-monto">$${(saldo?.saldo_disponible ?? 0).toLocaleString('es-CO')} COP</div>
+          <div class="saldo-sub">Saldo total acumulado: $${(saldo?.saldo_total ?? 0).toLocaleString('es-CO')} COP</div>
+          <button class="btn-retirar" id="btn-retirar"
+            ${(saldo?.saldo_disponible ?? 0) < MINIMO_RETIRO ? 'disabled' : ''}
+            onclick="abrirModal()">
+            ${(saldo?.saldo_disponible ?? 0) < MINIMO_RETIRO
+              ? `Mínimo $${MINIMO_RETIRO.toLocaleString('es-CO')} para retirar`
+              : '💸 Solicitar retiro'}
+          </button>
+        </div>
+
+        <div class="bonos-grid">
+          <div class="bono-card">
+            <div class="bono-icono">⬇️</div>
+            <div class="bono-monto">${totalDescargas}</div>
+            <div class="bono-label">Descargas totales<br><small style="color:#4f46e5">+$${BONO_DESCARGA} COP c/u</small></div>
+          </div>
+          <div class="bono-card">
+            <div class="bono-icono">🎁</div>
+            <div class="bono-monto">${(transacciones ?? []).filter(t => t.tipo === 'propina').length}</div>
+            <div class="bono-label">Propinas recibidas<br><small style="color:#4f46e5">Monto variable</small></div>
+          </div>
+        </div>
+
+        <div class="seccion">
+          <div class="seccion-titulo">📋 Historial de transacciones</div>
+          ${!transacciones || transacciones.length === 0
+            ? '<div class="vacio">Aún no tienes transacciones. ¡Sube apuntes para empezar a ganar!</div>'
+            : transacciones.map(t => `
+              <div class="transaccion-item">
+                <div class="transaccion-info">
+                  <div class="transaccion-icono ${t.tipo === 'retiro' ? 'icono-retiro' : t.tipo === 'propina' ? 'icono-propina' : 'icono-descarga'}">
+                    ${t.tipo === 'retiro' ? '💸' : t.tipo === 'propina' ? '🎁' : '⬇️'}
+                  </div>
+                  <div>
+                    <div class="transaccion-desc">${t.descripcion ?? t.tipo}</div>
+                    <div class="transaccion-fecha">${new Date(t.created_at).toLocaleDateString('es-CO')}</div>
+                  </div>
+                </div>
+                <div class="transaccion-monto ${t.tipo === 'retiro' ? 'monto-negativo' : 'monto-positivo'}">
+                  ${t.tipo === 'retiro' ? '-' : '+'}$${t.monto.toLocaleString('es-CO')}
+                </div>
+              </div>
+            `).join('')
+          }
+        </div>
+
+        <div class="seccion">
+          <div class="seccion-titulo">ℹ️ ¿Cómo funciona?</div>
+          <p style="font-size:14px;color:#666;line-height:1.7;">
+            Cada vez que alguien descarga uno de tus apuntes, ganas <strong>$${BONO_DESCARGA} COP</strong>.<br>
+            Cuando alguien te da una propina directamente desde el apunte, el monto se acredita a tu saldo.<br>
+            Cuando acumules <strong>$${MINIMO_RETIRO.toLocaleString('es-CO')} COP</strong> o más, puedes solicitar un retiro por Nequi, Bancolombia o Daviplata.
+          </p>
+        </div>
+      `
+    }
+
+    window.abrirModal = () => {
+      document.getElementById('modal-retiro').classList.add('visible')
+    }
+    window.cerrarModal = () => {
+      document.getElementById('modal-retiro').classList.remove('visible')
+      document.getElementById('msg-retiro').className = 'mensaje'
+    }
+    window.confirmarRetiro = async () => {
+      const monto  = parseFloat(document.getElementById('monto-retiro').value)
+      const metodo = document.getElementById('metodo-pago').value
+      const numero = document.getElementById('numero-cuenta').value.trim()
+      const msgEl  = document.getElementById('msg-retiro')
+
+      if (!monto || monto < window._MINIMO_RETIRO) {
+        msgEl.textContent = `El monto mínimo es $${window._MINIMO_RETIRO.toLocaleString('es-CO')} COP`
+        msgEl.className = 'mensaje error'
+        return
+      }
+      if (monto > (window._saldo?.saldo_disponible ?? 0)) {
+        msgEl.textContent = 'No tienes suficiente saldo disponible.'
+        msgEl.className = 'mensaje error'
+        return
+      }
+      if (!numero) {
+        msgEl.textContent = 'Por favor ingresa el número de cuenta.'
+        msgEl.className = 'mensaje error'
+        return
+      }
+
+      // Registrar retiro
+      await window._supabase.from('transacciones').insert([{
+        usuario_id: window._user.id,
+        tipo: 'retiro',
+        monto,
+        descripcion: `Retiro por ${metodo} al ${numero}`
+      }])
+
+      // Descontar saldo
+      await window._supabase.from('saldos').update({
+        saldo_disponible: (window._saldo.saldo_disponible - monto)
+      }).eq('usuario_id', window._user.id)
+
+      msgEl.textContent = '✅ Retiro solicitado. Se procesará en 1-3 días hábiles.'
+      msgEl.className = 'mensaje exito'
+      setTimeout(() => { window.cerrarModal(); window.location.reload() }, 2500)
+    }
+
+    init()
+  </script>
+
+</body>
+</html>
