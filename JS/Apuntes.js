@@ -1,10 +1,11 @@
 import { supabase } from './supabase-config.js'
-//Subir apunte 
+
+// ── Subir apunte ──────────────────────────────
 export async function subirApunte({ titulo, descripcion, materia, carrera, archivo, usuario }) {
   try {
     // 1. Subir el archivo PDF a Storage
     const nombreArchivo = `${usuario.id}_${Date.now()}_${archivo.name}`
-    const { data: storageData, error: storageError } = await supabase
+    const { error: storageError } = await supabase
       .storage
       .from('apuntes')
       .upload(nombreArchivo, archivo)
@@ -17,18 +18,20 @@ export async function subirApunte({ titulo, descripcion, materia, carrera, archi
       .from('apuntes')
       .getPublicUrl(nombreArchivo)
 
-    // 3. Guardar los datos en Firestore
+    // 3. Insertar en la tabla Apuntes
     const { data, error } = await supabase
-      .from('apuntes')
+      .from('Apuntes')
       .insert([{
         titulo,
         descripcion,
         materia,
         carrera,
         archivo_url: urlData.publicUrl,
-        usuario_id: usuario.id,
-        usuario_nombre: usuario.user_metadata?.full_name ?? 'Anónimo',
+        usuario_id:     usuario.id,
+        usuario_nombre: usuario.user_metadata?.full_name  ?? 'Anónimo',
         usuario_avatar: usuario.user_metadata?.avatar_url ?? null,
+        valoracion_promedio: 0,
+        total_descargas:     0,
       }])
       .select()
       .single()
@@ -42,17 +45,17 @@ export async function subirApunte({ titulo, descripcion, materia, carrera, archi
   }
 }
 
-//Obtener todos los apuntes
+// ── Obtener todos los apuntes ─────────────────
 export async function obtenerApuntes({ carrera, materia, busqueda } = {}) {
   try {
     let query = supabase
-      .from('apuntes')
+      .from('Apuntes')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (carrera)   query = query.eq('carrera', carrera)
-    if (materia)   query = query.eq('materia', materia)
-    if (busqueda)  query = query.ilike('titulo', `%${busqueda}%`)
+    if (carrera)  query = query.eq('carrera', carrera)
+    if (materia)  query = query.eq('materia', materia)
+    if (busqueda) query = query.ilike('titulo', `%${busqueda}%`)
 
     const { data, error } = await query
     if (error) throw error
@@ -64,11 +67,11 @@ export async function obtenerApuntes({ carrera, materia, busqueda } = {}) {
   }
 }
 
-//Obtener apunte por ID
+// ── Obtener apunte por ID ─────────────────────
 export async function obtenerApuntePorId(id) {
   try {
     const { data, error } = await supabase
-      .from('apuntes')
+      .from('Apuntes')
       .select('*')
       .eq('id', id)
       .single()
@@ -82,11 +85,11 @@ export async function obtenerApuntePorId(id) {
   }
 }
 
-//Obtener apuntes de un usuario
+// ── Obtener apuntes de un usuario ─────────────
 export async function obtenerApuntesDeUsuario(usuarioId) {
   try {
     const { data, error } = await supabase
-      .from('apuntes')
+      .from('Apuntes')
       .select('*')
       .eq('usuario_id', usuarioId)
       .order('created_at', { ascending: false })
@@ -100,58 +103,50 @@ export async function obtenerApuntesDeUsuario(usuarioId) {
   }
 }
 
-// Registrar descarga
+// ── Registrar descarga ────────────────────────
 export async function registrarDescarga(apunteId) {
   try {
-    const { error } = await supabase.rpc('incrementar_descargas', {
-      apunte_id: apunteId
-    })
-    if (error) throw error
-
-  } catch (error) {
-    // Si no existe la función RPC, hacemos update manual
     const { data: apunte } = await supabase
-      .from('apuntes')
+      .from('Apuntes')
       .select('total_descargas')
       .eq('id', apunteId)
       .single()
 
     await supabase
-      .from('apuntes')
+      .from('Apuntes')
       .update({ total_descargas: (apunte?.total_descargas ?? 0) + 1 })
       .eq('id', apunteId)
+
+  } catch (error) {
+    console.error('Error al registrar descarga:', error.message)
   }
 }
 
-// Valorar apunte
+// ── Valorar apunte ────────────────────────────
 export async function valorarApunte(apunteId, usuarioId, estrellas) {
   try {
     // 1. Verificar si el usuario ya valoró este apunte
     const { data: existente } = await supabase
-      .from('valoraciones')
+      .from('Valoraciones')
       .select('id')
       .eq('apunte_id', apunteId)
       .eq('usuario_id', usuarioId)
       .single()
 
     if (existente) {
-      // Actualizar valoración existente
-      const { error } = await supabase
-        .from('valoraciones')
+      await supabase
+        .from('Valoraciones')
         .update({ estrellas })
         .eq('id', existente.id)
-      if (error) throw error
     } else {
-      // Crear nueva valoración
-      const { error } = await supabase
-        .from('valoraciones')
+      await supabase
+        .from('Valoraciones')
         .insert([{ apunte_id: apunteId, usuario_id: usuarioId, estrellas }])
-      if (error) throw error
     }
 
     // 2. Recalcular promedio
     const { data: valoraciones } = await supabase
-      .from('valoraciones')
+      .from('Valoraciones')
       .select('estrellas')
       .eq('apunte_id', apunteId)
 
@@ -159,8 +154,8 @@ export async function valorarApunte(apunteId, usuarioId, estrellas) {
 
     // 3. Actualizar promedio en el apunte
     await supabase
-      .from('apuntes')
-      .update({ valoracion_promedio: promedio.toFixed(1) })
+      .from('Apuntes')
+      .update({ valoracion_promedio: parseFloat(promedio.toFixed(1)) })
       .eq('id', apunteId)
 
     return { error: null }
@@ -171,12 +166,11 @@ export async function valorarApunte(apunteId, usuarioId, estrellas) {
   }
 }
 
-// Eliminar apunte
+// ── Eliminar apunte ───────────────────────────
 export async function eliminarApunte(apunteId, usuarioId) {
   try {
-    // Solo el dueño puede eliminar
     const { error } = await supabase
-      .from('apuntes')
+      .from('Apuntes')
       .delete()
       .eq('id', apunteId)
       .eq('usuario_id', usuarioId)

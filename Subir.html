@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Friendnote — Subir apunte</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6fb;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    nav {
+      background: white;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #4f46e5;
+      text-decoration: none;
+    }
+
+    .btn-volver {
+      font-size: 14px;
+      color: #4f46e5;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── Contenido ── */
+    main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 16px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .subtitulo {
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    /* ── Formulario ── */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    label span {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border 0.2s;
+      background: white;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #4f46e5;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* ── Zona de archivo ── */
+    .drop-zone {
+      border: 2px dashed #c7d2fe;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #f8f7ff;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.activo {
+      border-color: #4f46e5;
+      background: #eef2ff;
+    }
+
+    .drop-zone .icono { font-size: 36px; margin-bottom: 8px; }
+
+    .drop-zone p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .drop-zone small { font-size: 12px; color: #aaa; }
+
+    .drop-zone input[type="file"] { display: none; }
+
+    .archivo-seleccionado {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: #eef2ff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #4f46e5;
+    }
+
+    .archivo-seleccionado.visible { display: flex; }
+
+    /* ── Botón submit ── */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-submit:hover:not(:disabled) { background: #4338ca; }
+
+    .btn-submit:disabled {
+      background: #a5b4fc;
+      cursor: not-allowed;
+    }
+
+    /* ── Barra de progreso ── */
+    .progreso-container {
+      display: none;
+      margin-top: 16px;
+    }
+
+    .progreso-container.visible { display: block; }
+
+    .progreso-bar {
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .progreso-fill {
+      height: 100%;
+      background: #4f46e5;
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .progreso-texto {
+      font-size: 12px;
+      color: #777;
+      text-align: center;
+    }
+
+    /* ── Mensajes ── */
+    .mensaje {
+      display: none;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    .mensaje.exito {
+      display: block;
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .mensaje.error {
+      display: block;
+      background: #fee2e2;
+      color: #dc2626;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">📚 Friendnote</a>
+    <a class="btn-volver" href="index.html">← Volver al inicio</a>
+  </nav>
+
+  <main>
+    <h1>Subir apunte</h1>
+    <p class="subtitulo">Comparte tu material de estudio con la comunidad</p>
+
+    <div class="form-group">
+      <label>Título <span>*</span></label>
+      <input type="text" id="titulo" placeholder="Ej: Resumen Cálculo Diferencial — Parcial 2"/>
+    </div>
+
+    <div class="form-group">
+      <label>Descripción</label>
+      <textarea id="descripcion" placeholder="¿Qué temas cubre este apunte?"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Carrera <span>*</span></label>
+        <select id="carrera">
+          <option value="">Seleccionar...</option>
+          <option>Ingeniería de Sistemas</option>
+          <option>Administración</option>
+          <option>Derecho</option>
+          <option>Medicina</option>
+          <option>Psicología</option>
+          <option>Otra</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Materia <span>*</span></label>
+        <input type="text" id="materia" placeholder="Ej: Cálculo Diferencial"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Archivo PDF <span>*</span></label>
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('archivo').click()">
+        <div class="icono">📄</div>
+        <p>Arrastra tu PDF aquí o haz clic para seleccionarlo</p>
+        <small>Solo archivos PDF — máximo 10MB</small>
+        <input type="file" id="archivo" accept=".pdf"/>
+      </div>
+      <div class="archivo-seleccionado" id="archivo-info">
+        📎 <span id="archivo-nombre"></span>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="btn-submit">Subir apunte</button>
+
+    <div class="progreso-container" id="progreso-container">
+      <div class="progreso-bar">
+        <div class="progreso-fill" id="progreso-fill"></div>
+      </div>
+      <p class="progreso-texto" id="progreso-texto">Subiendo archivo...</p>
+    </div>
+
+    <div class="mensaje" id="mensaje"></div>
+  </main>
+
+  <script type="module">
+    import { protegerPagina } from './js/auth.js'
+    import { subirApunte } from './js/apuntes.js'
+
+    const user = await protegerPagina()
+
+    // ── Drag & Drop ──
+    const dropZone = document.getElementById('drop-zone')
+    const inputArchivo = document.getElementById('archivo')
+    const archivoInfo = document.getElementById('archivo-info')
+    const archivoNombre = document.getElementById('archivo-nombre')
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault()
+      dropZone.classList.add('activo')
+    })
+
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('activo'))
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault()
+      dropZone.classList.remove('activo')
+      const file = e.dataTransfer.files[0]
+      if (file?.type === 'application/pdf') {
+        inputArchivo.files = e.dataTransfer.files
+        mostrarArchivoSeleccionado(file.name)
+      } else {
+        mostrarMensaje('Solo se permiten archivos PDF.', 'error')
+      }
+    })
+
+    inputArchivo.addEventListener('change', () => {
+      const file = inputArchivo.files[0]
+      if (file) mostrarArchivoSeleccionado(file.name)
+    })
+
+    function mostrarArchivoSeleccionado(nombre) {
+      archivoNombre.textContent = nombre
+      archivoInfo.classList.add('visible')
+    }
+
+    // ── Submit ──
+    document.getElementById('btn-submit').addEventListener('click', async () => {
+      const titulo      = document.getElementById('titulo').value.trim()
+      const descripcion = document.getElementById('descripcion').value.trim()
+      const carrera     = document.getElementById('carrera').value
+      const materia     = document.getElementById('materia').value.trim()
+      const archivo     = inputArchivo.files[0]
+
+      // Validar campos
+      if (!titulo || !carrera || !materia || !archivo) {
+        mostrarMensaje('Por favor completa todos los campos obligatorios.', 'error')
+        return
+      }
+
+      if (archivo.size > 10 * 1024 * 1024) {
+        mostrarMensaje('El archivo supera el límite de 10MB.', 'error')
+        return
+      }
+
+      // Mostrar progreso
+      const btn = document.getElementById('btn-submit')
+      btn.disabled = true
+      btn.textContent = 'Subiendo...'
+      mostrarProgreso(true, 30, 'Subiendo archivo...')
+
+      const { data, error } = await subirApunte({
+        titulo, descripcion, carrera, materia, archivo, usuario: user
+      })
+
+      mostrarProgreso(true, 100, 'Completado')
+
+      if (error) {
+        mostrarMensaje('Ocurrió un error al subir el apunte. Intenta de nuevo.', 'error')
+        btn.disabled = false
+        btn.textContent = 'Subir apunte'
+        return
+      }
+
+      mostrarMensaje('✅ ¡Apunte subido correctamente! Redirigiendo...', 'exito')
+      setTimeout(() => window.location.href = `detalle.html?id=${data.id}`, 2000)
+    })
+
+    function mostrarProgreso(visible, porcentaje, texto) {
+      const container = document.getElementById('progreso-container')
+      container.classList.toggle('visible', visible)
+      document.getElementById('progreso-fill').style.width = porcentaje + '%'
+      document.getElementById('progreso-texto').textContent = texto
+    }
+
+    function mostrarMensaje(texto, tipo) {
+      const el = document.getElementById('mensaje')
+      el.textContent = texto
+      el.className = `mensaje ${tipo}`
+    }
+  </script>
+
+</body>
+</html>
