@@ -3,7 +3,6 @@ import { supabase } from './supabase-config.js'
 // ── Subir apunte ──────────────────────────────
 export async function subirApunte({ titulo, descripcion, materia, carrera, archivo, usuario }) {
   try {
-    // 1. Subir el archivo PDF a Storage
     const nombreArchivo = `${usuario.id}_${Date.now()}_${archivo.name}`
     const { error: storageError } = await supabase
       .storage
@@ -12,15 +11,13 @@ export async function subirApunte({ titulo, descripcion, materia, carrera, archi
 
     if (storageError) throw storageError
 
-    // 2. Obtener la URL pública del archivo
     const { data: urlData } = supabase
       .storage
       .from('apuntes')
       .getPublicUrl(nombreArchivo)
 
-    // 3. Insertar en la tabla Apuntes
     const { data, error } = await supabase
-      .from('Apuntes')
+      .from('apuntes')
       .insert([{
         titulo,
         descripcion,
@@ -49,7 +46,7 @@ export async function subirApunte({ titulo, descripcion, materia, carrera, archi
 export async function obtenerApuntes({ carrera, materia, busqueda } = {}) {
   try {
     let query = supabase
-      .from('Apuntes')
+      .from('apuntes')
       .select('*')
       .order('created_at', { ascending: false })
 
@@ -71,7 +68,7 @@ export async function obtenerApuntes({ carrera, materia, busqueda } = {}) {
 export async function obtenerApuntePorId(id) {
   try {
     const { data, error } = await supabase
-      .from('Apuntes')
+      .from('apuntes')
       .select('*')
       .eq('id', id)
       .single()
@@ -89,7 +86,7 @@ export async function obtenerApuntePorId(id) {
 export async function obtenerApuntesDeUsuario(usuarioId) {
   try {
     const { data, error } = await supabase
-      .from('Apuntes')
+      .from('apuntes')
       .select('*')
       .eq('usuario_id', usuarioId)
       .order('created_at', { ascending: false })
@@ -107,13 +104,13 @@ export async function obtenerApuntesDeUsuario(usuarioId) {
 export async function registrarDescarga(apunteId) {
   try {
     const { data: apunte } = await supabase
-      .from('Apuntes')
+      .from('apuntes')
       .select('total_descargas')
       .eq('id', apunteId)
       .single()
 
     await supabase
-      .from('Apuntes')
+      .from('apuntes')
       .update({ total_descargas: (apunte?.total_descargas ?? 0) + 1 })
       .eq('id', apunteId)
 
@@ -125,9 +122,8 @@ export async function registrarDescarga(apunteId) {
 // ── Valorar apunte ────────────────────────────
 export async function valorarApunte(apunteId, usuarioId, estrellas) {
   try {
-    // 1. Verificar si el usuario ya valoró este apunte
     const { data: existente } = await supabase
-      .from('Valoraciones')
+      .from('valoraciones')
       .select('id')
       .eq('apunte_id', apunteId)
       .eq('usuario_id', usuarioId)
@@ -135,26 +131,24 @@ export async function valorarApunte(apunteId, usuarioId, estrellas) {
 
     if (existente) {
       await supabase
-        .from('Valoraciones')
+        .from('valoraciones')
         .update({ estrellas })
         .eq('id', existente.id)
     } else {
       await supabase
-        .from('Valoraciones')
+        .from('valoraciones')
         .insert([{ apunte_id: apunteId, usuario_id: usuarioId, estrellas }])
     }
 
-    // 2. Recalcular promedio
     const { data: valoraciones } = await supabase
-      .from('Valoraciones')
+      .from('valoraciones')
       .select('estrellas')
       .eq('apunte_id', apunteId)
 
     const promedio = valoraciones.reduce((acc, v) => acc + v.estrellas, 0) / valoraciones.length
 
-    // 3. Actualizar promedio en el apunte
     await supabase
-      .from('Apuntes')
+      .from('apuntes')
       .update({ valoracion_promedio: parseFloat(promedio.toFixed(1)) })
       .eq('id', apunteId)
 
@@ -170,7 +164,7 @@ export async function valorarApunte(apunteId, usuarioId, estrellas) {
 export async function eliminarApunte(apunteId, usuarioId) {
   try {
     const { error } = await supabase
-      .from('Apuntes')
+      .from('apuntes')
       .delete()
       .eq('id', apunteId)
       .eq('usuario_id', usuarioId)

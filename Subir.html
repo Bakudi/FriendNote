@@ -7,226 +7,39 @@
   <link rel="stylesheet" href="css/main.css"/>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6fb;
-      color: #1a1a2e;
-      min-height: 100vh;
-    }
-
-    /* ── Navbar ── */
-    nav {
-      background: white;
-      padding: 0 24px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .nav-logo {
-      font-size: 20px;
-      font-weight: 700;
-      color: #4f46e5;
-      text-decoration: none;
-    }
-
-    .btn-volver {
-      font-size: 14px;
-      color: #4f46e5;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* ── Contenido ── */
-    main {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 40px 16px;
-    }
-
-    h1 {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    .subtitulo {
-      color: #777;
-      font-size: 14px;
-      margin-bottom: 32px;
-    }
-
-    /* ── Formulario ── */
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 6px;
-      color: #333;
-    }
-
-    label span {
-      color: #ef4444;
-      margin-left: 2px;
-    }
-
-    input[type="text"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid #e0e0e0;
-      border-radius: 10px;
-      font-size: 15px;
-      font-family: inherit;
-      outline: none;
-      transition: border 0.2s;
-      background: white;
-    }
-
-    input[type="text"]:focus,
-    textarea:focus,
-    select:focus {
-      border-color: #4f46e5;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    /* ── Zona de archivo ── */
-    .drop-zone {
-      border: 2px dashed #c7d2fe;
-      border-radius: 12px;
-      padding: 40px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: #f8f7ff;
-    }
-
-    .drop-zone:hover,
-    .drop-zone.activo {
-      border-color: #4f46e5;
-      background: #eef2ff;
-    }
-
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6fb; color: #1a1a2e; min-height: 100vh; }
+    nav { background: white; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
+    .nav-logo { font-size: 20px; font-weight: 700; color: #4f46e5; text-decoration: none; }
+    .btn-volver { font-size: 14px; color: #4f46e5; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    main { max-width: 600px; margin: 0 auto; padding: 40px 16px; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .subtitulo { color: #777; font-size: 14px; margin-bottom: 32px; }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; color: #333; }
+    label span { color: #ef4444; margin-left: 2px; }
+    input[type="text"], textarea, select { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; outline: none; transition: border 0.2s; background: white; }
+    input[type="text"]:focus, textarea:focus, select:focus { border-color: #4f46e5; }
+    textarea { resize: vertical; min-height: 100px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .drop-zone { border: 2px dashed #c7d2fe; border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8f7ff; }
+    .drop-zone:hover, .drop-zone.activo { border-color: #4f46e5; background: #eef2ff; }
     .drop-zone .icono { font-size: 36px; margin-bottom: 8px; }
-
-    .drop-zone p {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 4px;
-    }
-
+    .drop-zone p { font-size: 14px; color: #666; margin-bottom: 4px; }
     .drop-zone small { font-size: 12px; color: #aaa; }
-
     .drop-zone input[type="file"] { display: none; }
-
-    .archivo-seleccionado {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      background: #eef2ff;
-      border-radius: 8px;
-      padding: 10px 14px;
-      margin-top: 10px;
-      font-size: 13px;
-      color: #4f46e5;
-    }
-
+    .archivo-seleccionado { display: none; align-items: center; gap: 10px; background: #eef2ff; border-radius: 8px; padding: 10px 14px; margin-top: 10px; font-size: 13px; color: #4f46e5; }
     .archivo-seleccionado.visible { display: flex; }
-
-    /* ── Botón submit ── */
-    .btn-submit {
-      width: 100%;
-      padding: 14px;
-      background: #4f46e5;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-      margin-top: 8px;
-    }
-
+    .btn-submit { width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
     .btn-submit:hover:not(:disabled) { background: #4338ca; }
-
-    .btn-submit:disabled {
-      background: #a5b4fc;
-      cursor: not-allowed;
-    }
-
-    /* ── Barra de progreso ── */
-    .progreso-container {
-      display: none;
-      margin-top: 16px;
-    }
-
+    .btn-submit:disabled { background: #a5b4fc; cursor: not-allowed; }
+    .progreso-container { display: none; margin-top: 16px; }
     .progreso-container.visible { display: block; }
-
-    .progreso-bar {
-      height: 6px;
-      background: #e0e0e0;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 6px;
-    }
-
-    .progreso-fill {
-      height: 100%;
-      background: #4f46e5;
-      border-radius: 10px;
-      width: 0%;
-      transition: width 0.3s;
-    }
-
-    .progreso-texto {
-      font-size: 12px;
-      color: #777;
-      text-align: center;
-    }
-
-    /* ── Mensajes ── */
-    .mensaje {
-      display: none;
-      border-radius: 10px;
-      padding: 14px 16px;
-      font-size: 14px;
-      margin-top: 16px;
-    }
-
-    .mensaje.exito {
-      display: block;
-      background: #dcfce7;
-      color: #16a34a;
-    }
-
-    .mensaje.error {
-      display: block;
-      background: #fee2e2;
-      color: #dc2626;
-    }
+    .progreso-bar { height: 6px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 6px; }
+    .progreso-fill { height: 100%; background: #4f46e5; border-radius: 10px; width: 0%; transition: width 0.3s; }
+    .progreso-texto { font-size: 12px; color: #777; text-align: center; }
+    .mensaje { display: none; border-radius: 10px; padding: 14px 16px; font-size: 14px; margin-top: 16px; }
+    .mensaje.exito { display: block; background: #dcfce7; color: #16a34a; }
+    .mensaje.error { display: block; background: #fee2e2; color: #dc2626; }
   </style>
 </head>
 <body>
@@ -263,7 +76,6 @@
           <option>Otra</option>
         </select>
       </div>
-
       <div class="form-group">
         <label>Materia <span>*</span></label>
         <input type="text" id="materia" placeholder="Ej: Cálculo Diferencial"/>
@@ -296,42 +108,39 @@
   </main>
 
   <script type="module">
-    import { protegerPagina } from './js/auth.js'
-    import { subirApunte } from './js/apuntes.js'
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    const user = await protegerPagina()
+    const SUPABASE_URL = 'https://ojwnvijcyrddpadyyoce.supabase.co'
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qd252aWpjeXJkZHBhZHl5b2NlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0ODUxNzcsImV4cCI6MjA5NTA2MTE3N30.Lg-NuNcwWcI8hwmost-TtJQ0YzlSDTZE2ciL9BtK0yQ'
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+    // Verificar sesión
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { window.location.href = '/login.html'; }
 
     // ── Drag & Drop ──
-    const dropZone = document.getElementById('drop-zone')
+    const dropZone    = document.getElementById('drop-zone')
     const inputArchivo = document.getElementById('archivo')
-    const archivoInfo = document.getElementById('archivo-info')
+    const archivoInfo  = document.getElementById('archivo-info')
     const archivoNombre = document.getElementById('archivo-nombre')
 
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault()
-      dropZone.classList.add('activo')
-    })
-
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('activo') })
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('activo'))
-
     dropZone.addEventListener('drop', (e) => {
       e.preventDefault()
       dropZone.classList.remove('activo')
       const file = e.dataTransfer.files[0]
       if (file?.type === 'application/pdf') {
         inputArchivo.files = e.dataTransfer.files
-        mostrarArchivoSeleccionado(file.name)
+        mostrarArchivo(file.name)
       } else {
         mostrarMensaje('Solo se permiten archivos PDF.', 'error')
       }
     })
-
     inputArchivo.addEventListener('change', () => {
-      const file = inputArchivo.files[0]
-      if (file) mostrarArchivoSeleccionado(file.name)
+      if (inputArchivo.files[0]) mostrarArchivo(inputArchivo.files[0].name)
     })
-
-    function mostrarArchivoSeleccionado(nombre) {
+    function mostrarArchivo(nombre) {
       archivoNombre.textContent = nombre
       archivoInfo.classList.add('visible')
     }
@@ -344,38 +153,67 @@
       const materia     = document.getElementById('materia').value.trim()
       const archivo     = inputArchivo.files[0]
 
-      // Validar campos
       if (!titulo || !carrera || !materia || !archivo) {
         mostrarMensaje('Por favor completa todos los campos obligatorios.', 'error')
         return
       }
-
       if (archivo.size > 10 * 1024 * 1024) {
         mostrarMensaje('El archivo supera el límite de 10MB.', 'error')
         return
       }
 
-      // Mostrar progreso
       const btn = document.getElementById('btn-submit')
       btn.disabled = true
       btn.textContent = 'Subiendo...'
       mostrarProgreso(true, 30, 'Subiendo archivo...')
 
-      const { data, error } = await subirApunte({
-        titulo, descripcion, carrera, materia, archivo, usuario: user
-      })
+      try {
+        // 1. Subir PDF a Storage
+        const nombreArchivo = `${user.id}_${Date.now()}_${archivo.name}`
+        const { error: storageError } = await supabase.storage
+          .from('apuntes')
+          .upload(nombreArchivo, archivo)
 
-      mostrarProgreso(true, 100, 'Completado')
+        if (storageError) throw storageError
 
-      if (error) {
-        mostrarMensaje('Ocurrió un error al subir el apunte. Intenta de nuevo.', 'error')
+        mostrarProgreso(true, 60, 'Guardando información...')
+
+        // 2. Obtener URL pública
+        const { data: urlData } = supabase.storage
+          .from('apuntes')
+          .getPublicUrl(nombreArchivo)
+
+        // 3. Insertar en tabla
+        const { data, error } = await supabase
+          .from('apuntes')
+          .insert([{
+            titulo,
+            descripcion,
+            materia,
+            carrera,
+            archivo_url:         urlData.publicUrl,
+            usuario_id:          user.id,
+            usuario_nombre:      user.user_metadata?.full_name  ?? 'Anónimo',
+            usuario_avatar:      user.user_metadata?.avatar_url ?? null,
+            valoracion_promedio: 0,
+            total_descargas:     0,
+          }])
+          .select()
+          .single()
+
+        if (error) throw error
+
+        mostrarProgreso(true, 100, '¡Completado!')
+        mostrarMensaje('✅ ¡Apunte subido correctamente! Redirigiendo...', 'exito')
+        setTimeout(() => window.location.href = `detalle.html?id=${data.id}`, 2000)
+
+      } catch (err) {
+        console.error('Error:', err.message)
+        mostrarMensaje(`Error: ${err.message}`, 'error')
         btn.disabled = false
         btn.textContent = 'Subir apunte'
-        return
+        mostrarProgreso(false, 0, '')
       }
-
-      mostrarMensaje('✅ ¡Apunte subido correctamente! Redirigiendo...', 'exito')
-      setTimeout(() => window.location.href = `detalle.html?id=${data.id}`, 2000)
     })
 
     function mostrarProgreso(visible, porcentaje, texto) {
