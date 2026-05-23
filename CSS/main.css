@@ -278,3 +278,28 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   .metricas-grid { grid-template-columns: 1fr !important; }
   .modal-btns { flex-direction: column; }
 }
+
+/* Mejoras visuales globales inmediatas */
+body {
+  background: #f4f6fb;
+}
+
+nav, .navbar {
+  transition: box-shadow 0.2s;
+}
+
+input, textarea, select {
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, textarea:focus, select:focus {
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+a {
+  transition: opacity 0.2s;
+}
+
+button {
+  transition: all 0.2s;
+}

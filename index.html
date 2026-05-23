@@ -10,77 +10,13 @@
   <meta property="og:title" content="Friendnote — Apuntes universitarios"/>
   <meta property="og:description" content="Comparte y descarga apuntes universitarios gratis."/>
   <meta property="og:type" content="website"/>
-  
+  <link rel="manifest" href="/manifest.json"/>
+
   <title>Friendnote — Home</title>
   <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/components.css"/>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6fb;
-      color: #1a1a2e;
-    }
-
-    /* ── Navbar ── */
-    nav {
-      background: white;
-      padding: 0 24px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .nav-logo {
-      font-size: 20px;
-      font-weight: 700;
-      color: #4f46e5;
-      text-decoration: none;
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .nav-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      cursor: pointer;
-      border: 2px solid #e0e0ff;
-    }
-
-    .btn-subir {
-      background: #4f46e5;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.2s;
-    }
-
-    .btn-subir:hover { background: #4338ca; }
-
-    /* ── Contenido principal ── */
-    main {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 32px 16px;
-    }
-
-    /* ── Buscador ── */
+    /* Solo estilos únicos de esta página */
     .search-bar {
       display: flex;
       gap: 10px;
@@ -90,48 +26,28 @@
     .search-bar input {
       flex: 1;
       padding: 12px 16px;
-      border: 1.5px solid #e0e0e0;
-      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
       font-size: 15px;
       outline: none;
       transition: border 0.2s;
+      font-family: var(--font);
     }
 
-    .search-bar input:focus { border-color: #4f46e5; }
+    .search-bar input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+    }
 
     .search-bar select {
       padding: 12px 14px;
-      border: 1.5px solid #e0e0e0;
-      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
       font-size: 14px;
       outline: none;
       background: white;
       cursor: pointer;
-    }
-
-    /* ── Grid de apuntes ── */
-    .apuntes-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
-    }
-
-    /* ── Card de apunte ── */
-    .apunte-card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
-
-    .apunte-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(79,70,229,0.12);
+      font-family: var(--font);
     }
 
     .apunte-materia {
@@ -139,8 +55,8 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #4f46e5;
-      background: #eef2ff;
+      color: var(--primary);
+      background: var(--primary-light);
       padding: 3px 8px;
       border-radius: 20px;
       display: inline-block;
@@ -152,11 +68,12 @@
       font-weight: 600;
       margin-bottom: 6px;
       line-height: 1.3;
+      color: var(--text-primary);
     }
 
     .apunte-descripcion {
       font-size: 13px;
-      color: #777;
+      color: var(--text-secondary);
       margin-bottom: 14px;
       line-height: 1.5;
       display: -webkit-box;
@@ -170,7 +87,7 @@
       align-items: center;
       justify-content: space-between;
       font-size: 12px;
-      color: #999;
+      color: var(--text-muted);
     }
 
     .apunte-autor {
@@ -186,19 +103,75 @@
       object-fit: cover;
     }
 
-    .apunte-stats {
-      display: flex;
-      gap: 10px;
-    }
+    .apunte-stats { display: flex; gap: 10px; }
 
-    /* ── Estado vacío / cargando ── */
-    .estado {
-      text-align: center;
-      padding: 60px 20px;
-      color: #999;
-    }
-
+    .estado { text-align: center; padding: 60px 20px; color: var(--text-muted); }
     .estado p { font-size: 15px; margin-top: 8px; }
+
+    /* ── Navbar ── */
+    nav {
+      background: var(--white);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+
+    .nav-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      cursor: pointer;
+      border: 2px solid var(--primary-light);
+      transition: transform 0.2s;
+    }
+
+    .nav-avatar:hover { transform: scale(1.05); }
+
+    .btn-subir {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .btn-subir:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 16px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .search-bar { flex-direction: column; }
+      .search-bar select { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -207,15 +180,20 @@
     <a class="nav-logo" href="index.html">📚 Friendnote</a>
     <div class="nav-actions">
       <a class="btn-subir" href="subir.html">+ Subir apunte</a>
-      <img class="nav-avatar" id="user-avatar" src="https://ui-avatars.com/api/?name=U" alt="Perfil"
+      <img class="nav-avatar" id="user-avatar"
+           src="https://ui-avatars.com/api/?name=U"
+           alt="Ver perfil"
+           aria-label="Ver mi perfil"
            onclick="window.location.href='perfil.html'"/>
     </div>
   </nav>
 
   <main>
     <div class="search-bar">
-      <input type="text" id="input-busqueda" placeholder="Buscar apuntes por título..."/>
-      <select id="filtro-carrera">
+      <input type="text" id="input-busqueda"
+             placeholder="Buscar apuntes por título..."
+             aria-label="Buscar apuntes"/>
+      <select id="filtro-carrera" aria-label="Filtrar por carrera">
         <option value="">Todas las carreras</option>
         <option value="Ingeniería de Sistemas">Ing. Sistemas</option>
         <option value="Administración">Administración</option>
@@ -231,64 +209,74 @@
   </main>
 
   <script type="module">
-    import { protegerPagina } from './js/auth.js'
-    import { obtenerApuntes } from './js/apuntes.js'
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    import { insertarSelectorIdioma } from './js/i18n.js'
+
+    const supabase = createClient(
+      'https://ojwnvijcyrddpadyyoce.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qd252aWpjeXJkZHBhZHl5b2NlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0ODUxNzcsImV4cCI6MjA5NTA2MTE3N30.Lg-NuNcwWcI8hwmost-TtJQ0YzlSDTZE2ciL9BtK0yQ'
+    )
 
     let busquedaTimer = null
 
-    // Proteger página
-    const user = await protegerPagina()
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { window.location.href = '/login.html'; return }
 
-    // Mostrar avatar del usuario
-    if (user?.user_metadata?.avatar_url) {
-      document.getElementById('user-avatar').src = user.user_metadata.avatar_url
+      if (user?.user_metadata?.avatar_url) {
+        document.getElementById('user-avatar').src = user.user_metadata.avatar_url
+      }
+
+      insertarSelectorIdioma()
+      await cargarApuntes()
+
+      document.getElementById('input-busqueda').addEventListener('input', () => {
+        clearTimeout(busquedaTimer)
+        busquedaTimer = setTimeout(cargarApuntes, 400)
+      })
+
+      document.getElementById('filtro-carrera').addEventListener('change', cargarApuntes)
     }
 
-    // Cargar apuntes iniciales
-    await cargarApuntes()
-
-    // Buscar al escribir (con debounce)
-    document.getElementById('input-busqueda').addEventListener('input', (e) => {
-      clearTimeout(busquedaTimer)
-      busquedaTimer = setTimeout(() => cargarApuntes(), 400)
-    })
-
-    // Filtrar por carrera
-    document.getElementById('filtro-carrera').addEventListener('change', () => cargarApuntes())
-
     async function cargarApuntes() {
-      const busqueda = document.getElementById('input-busqueda').value.trim()
-      const carrera  = document.getElementById('filtro-carrera').value
+      const busqueda  = document.getElementById('input-busqueda').value.trim()
+      const carrera   = document.getElementById('filtro-carrera').value
       const container = document.getElementById('apuntes-container')
 
       container.innerHTML = '<div class="estado">⏳ <p>Cargando apuntes...</p></div>'
 
-      const { data: apuntes } = await obtenerApuntes({ busqueda, carrera })
+      let query = supabase.from('apuntes').select('*').order('created_at', { ascending: false })
+      if (carrera)  query = query.eq('carrera', carrera)
+      if (busqueda) query = query.ilike('titulo', `%${busqueda}%`)
+
+      const { data: apuntes } = await query
 
       if (!apuntes || apuntes.length === 0) {
         container.innerHTML = '<div class="estado">📭 <p>No se encontraron apuntes.</p></div>'
         return
       }
 
-      container.innerHTML = apuntes.map(apunte => `
-        <a class="apunte-card" href="detalle.html?id=${apunte.id}">
-          <span class="apunte-materia">${apunte.materia}</span>
-          <div class="apunte-titulo">${apunte.titulo}</div>
-          <div class="apunte-descripcion">${apunte.descripcion ?? 'Sin descripción'}</div>
+      container.innerHTML = apuntes.map(a => `
+        <a class="apunte-card" href="detalle.html?id=${a.id}">
+          <span class="apunte-materia">${a.materia}</span>
+          <div class="apunte-titulo">${a.titulo}</div>
+          <div class="apunte-descripcion">${a.descripcion ?? 'Sin descripción'}</div>
           <div class="apunte-footer">
             <div class="apunte-autor">
-              <img src="${apunte.usuario_avatar ?? `https://ui-avatars.com/api/?name=${apunte.usuario_nombre}`}"
-                   alt="${apunte.usuario_nombre}"/>
-              ${apunte.usuario_nombre}
+              <img src="${a.usuario_avatar ?? `https://ui-avatars.com/api/?name=${a.usuario_nombre}`}"
+                   alt="${a.usuario_nombre}"/>
+              ${a.usuario_nombre}
             </div>
             <div class="apunte-stats">
-              ⭐ ${apunte.valoracion_promedio ?? '—'}
-              &nbsp;⬇️ ${apunte.total_descargas ?? 0}
+              ⭐ ${a.valoracion_promedio ?? '—'}
+              &nbsp;⬇️ ${a.total_descargas ?? 0}
             </div>
           </div>
         </a>
       `).join('')
     }
+
+    init()
   </script>
 
 </body>
