@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Friendnote — Detalle</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6fb; color: #1a1a2e; min-height: 100vh; }
+    nav { background: white; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
+    .nav-logo { font-size: 20px; font-weight: 700; color: #4f46e5; text-decoration: none; }
+    .btn-volver { font-size: 14px; color: #4f46e5; text-decoration: none; }
+    main { max-width: 720px; margin: 0 auto; padding: 40px 16px; }
+    .card { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .badge-materia { display: inline-block; background: #eef2ff; color: #4f46e5; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
+    .titulo { font-size: 26px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
+    .descripcion { color: #666; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
+    .meta { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 28px; }
+    .meta-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #777; }
+    .meta-item img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+    .btn-descargar { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.2s; margin-bottom: 12px; }
+    .btn-descargar:hover { background: #4338ca; }
+    .btn-eliminar { display: none; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: white; color: #dc2626; border: 1.5px solid #dc2626; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .btn-eliminar:hover { background: #fee2e2; }
+    .btn-eliminar.visible { display: flex; }
+    .card-valoracion h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+    .estrellas { display: flex; gap: 8px; margin-bottom: 12px; }
+    .estrella { font-size: 32px; cursor: pointer; transition: transform 0.1s; filter: grayscale(1); }
+    .estrella:hover, .estrella.activa { filter: grayscale(0); transform: scale(1.15); }
+    .valoracion-actual { font-size: 14px; color: #777; margin-bottom: 16px; }
+    .btn-valorar { padding: 10px 24px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .btn-valorar:hover { background: #4338ca; }
+    .mensaje-valoracion { display: none; font-size: 13px; margin-top: 10px; padding: 8px 12px; border-radius: 8px; }
+    .mensaje-valoracion.exito { display: block; background: #dcfce7; color: #16a34a; }
+    .mensaje-valoracion.error { display: block; background: #fee2e2; color: #dc2626; }
+    .pdf-preview { width: 100%; height: 500px; border: none; border-radius: 10px; background: #f4f6fb; }
+    .loading { text-align: center; padding: 80px 20px; color: #999; font-size: 15px; }
+    .error-msg { text-align: center; padding: 80px 20px; color: #dc2626; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">📚 Friendnote</a>
+    <a class="btn-volver" href="index.html">← Volver</a>
+  </nav>
+
+  <main id="contenido">
+    <div class="loading">⏳ Cargando apunte...</div>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const supabase = createClient(
+      'https://ojwnvijcyrddpadyyoce.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qd252aWpjeXJkZHBhZHl5b2NlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0ODUxNzcsImV4cCI6MjA5NTA2MTE3N30.Lg-NuNcwWcI8hwmost-TtJQ0YzlSDTZE2ciL9BtK0yQ'
+    )
+
+    async function init() {
+      // Verificar sesión
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { window.location.href = '/login.html'; return }
+
+      // Obtener ID del apunte desde la URL
+      const params = new URLSearchParams(window.location.search)
+      const id = params.get('id')
+      if (!id) { window.location.href = '/index.html'; return }
+
+      // Cargar apunte
+      const { data: apunte, error } = await supabase
+        .from('apuntes')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error || !apunte) {
+        document.getElementById('contenido').innerHTML = '<div class="error-msg">❌ Apunte no encontrado.</div>'
+        return
+      }
+
+      const esDueno = user.id === apunte.usuario_id
+
+      // Renderizar contenido
+      document.getElementById('contenido').innerHTML = `
+        <div class="card">
+          <span class="badge-materia">${apunte.materia}</span>
+          <div class="titulo">${apunte.titulo}</div>
+          <div class="descripcion">${apunte.descripcion ?? 'Sin descripción'}</div>
+          <div class="meta">
+            <div class="meta-item">
+              <img src="${apunte.usuario_avatar ?? `https://ui-avatars.com/api/?name=${apunte.usuario_nombre}`}" alt="${apunte.usuario_nombre}"/>
+              ${apunte.usuario_nombre}
+            </div>
+            <div class="meta-item">📚 ${apunte.carrera}</div>
+            <div class="meta-item">⭐ ${apunte.valoracion_promedio ?? '0'} promedio</div>
+            <div class="meta-item">⬇️ ${apunte.total_descargas ?? 0} descargas</div>
+            <div class="meta-item">📅 ${new Date(apunte.created_at).toLocaleDateString('es-CO')}</div>
+          </div>
+          <a class="btn-descargar" href="${apunte.archivo_url}" target="_blank" id="btn-descargar">
+            ⬇️ Descargar apunte
+          </a>
+          <button class="btn-eliminar ${esDueno ? 'visible' : ''}" id="btn-eliminar">
+            🗑️ Eliminar apunte
+          </button>
+        </div>
+
+        <div class="card">
+          <iframe class="pdf-preview" src="${apunte.archivo_url}" title="Vista previa del apunte"></iframe>
+        </div>
+
+        <div class="card card-valoracion">
+          <h3>¿Te fue útil este apunte?</h3>
+          <div class="estrellas" id="estrellas">
+            <span class="estrella" data-val="1">⭐</span>
+            <span class="estrella" data-val="2">⭐</span>
+            <span class="estrella" data-val="3">⭐</span>
+            <span class="estrella" data-val="4">⭐</span>
+            <span class="estrella" data-val="5">⭐</span>
+          </div>
+          <p class="valoracion-actual" id="valoracion-actual">Selecciona una valoración</p>
+          <button class="btn-valorar" id="btn-valorar">Enviar valoración</button>
+          <div class="mensaje-valoracion" id="msg-valoracion"></div>
+        </div>
+      `
+
+      // ── Registrar descarga ──
+      document.getElementById('btn-descargar').addEventListener('click', async () => {
+        await supabase
+          .from('apuntes')
+          .update({ total_descargas: (apunte.total_descargas ?? 0) + 1 })
+          .eq('id', id)
+      })
+
+      // ── Eliminar apunte ──
+      document.getElementById('btn-eliminar')?.addEventListener('click', async () => {
+        if (!confirm('¿Estás seguro de que quieres eliminar este apunte?')) return
+        const { error } = await supabase.from('apuntes').delete().eq('id', id)
+        if (!error) window.location.href = '/index.html'
+      })
+
+      // ── Sistema de estrellas ──
+      let estrellaSeleccionada = 0
+      const estrellas = document.querySelectorAll('.estrella')
+
+      estrellas.forEach(estrella => {
+        estrella.addEventListener('mouseover', () => {
+          const val = parseInt(estrella.dataset.val)
+          estrellas.forEach((e, i) => e.classList.toggle('activa', i < val))
+        })
+        estrella.addEventListener('mouseout', () => {
+          estrellas.forEach((e, i) => e.classList.toggle('activa', i < estrellaSeleccionada))
+        })
+        estrella.addEventListener('click', () => {
+          estrellaSeleccionada = parseInt(estrella.dataset.val)
+          document.getElementById('valoracion-actual').textContent =
+            `Seleccionaste ${estrellaSeleccionada} estrella${estrellaSeleccionada > 1 ? 's' : ''}`
+        })
+      })
+
+      // ── Enviar valoración ──
+      document.getElementById('btn-valorar').addEventListener('click', async () => {
+        if (!estrellaSeleccionada) {
+          mostrarMsgValoracion('Selecciona una cantidad de estrellas primero.', 'error')
+          return
+        }
+
+        const { data: existente } = await supabase
+          .from('valoraciones')
+          .select('id')
+          .eq('apunte_id', id)
+          .eq('usuario_id', user.id)
+          .single()
+
+        if (existente) {
+          await supabase.from('valoraciones').update({ estrellas: estrellaSeleccionada }).eq('id', existente.id)
+        } else {
+          await supabase.from('valoraciones').insert([{ apunte_id: id, usuario_id: user.id, estrellas: estrellaSeleccionada }])
+        }
+
+        const { data: vals } = await supabase.from('valoraciones').select('estrellas').eq('apunte_id', id)
+        const promedio = vals.reduce((acc, v) => acc + v.estrellas, 0) / vals.length
+        await supabase.from('apuntes').update({ valoracion_promedio: parseFloat(promedio.toFixed(1)) }).eq('id', id)
+
+        mostrarMsgValoracion('✅ ¡Valoración enviada correctamente!', 'exito')
+      })
+    }
+
+    function mostrarMsgValoracion(texto, tipo) {
+      const el = document.getElementById('msg-valoracion')
+      el.textContent = texto
+      el.className = `mensaje-valoracion ${tipo}`
+    }
+
+    init()
+  </script>
+
+</body>
+</html>
