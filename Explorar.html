@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
   <meta name="description" content="Explora miles de apuntes universitarios organizados por carrera y materia. Filtra por Ingeniería, Medicina, Derecho y más."/>
-<meta property="og:title" content="Explorar apuntes — Friendnote"/>
-<link rel="canonical" href="https://friendnote.app/explorar.html"/>
-
+  <meta property="og:title" content="Explorar apuntes — Friendnote"/>
+  <link rel="canonical" href="https://friendnote.app/explorar.html"/>
   <title>Friendnote — Explorar</title>
   <link rel="stylesheet" href="css/main.css"/>
   <link rel="stylesheet" href="css/components.css"/>
@@ -21,36 +19,25 @@
     .nav-links a:hover { color: #4f46e5; }
     .nav-links a.activo { color: #4f46e5; font-weight: 600; }
     .nav-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #e0e0ff; }
-
     main { max-width: 960px; margin: 0 auto; padding: 40px 16px; }
-
-    /* ── Hero búsqueda ── */
     .hero { text-align: center; margin-bottom: 36px; }
     .hero h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
     .hero p { color: #777; font-size: 15px; margin-bottom: 24px; }
-
     .search-grande { display: flex; gap: 10px; max-width: 600px; margin: 0 auto; }
     .search-grande input { flex: 1; padding: 14px 18px; border: 1.5px solid #e0e0e0; border-radius: 12px; font-size: 16px; outline: none; transition: border 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
     .search-grande input:focus { border-color: #4f46e5; }
     .btn-buscar { padding: 14px 24px; background: #4f46e5; color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
     .btn-buscar:hover { background: #4338ca; }
-
-    /* ── Filtros ── */
     .filtros { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
     .filtros select { padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 14px; outline: none; background: white; cursor: pointer; transition: border 0.2s; }
     .filtros select:focus { border-color: #4f46e5; }
-
     .filtros-tags { display: flex; gap: 8px; flex-wrap: wrap; }
     .tag { padding: 6px 14px; background: white; border: 1.5px solid #e0e0e0; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
     .tag:hover, .tag.activo { background: #4f46e5; color: white; border-color: #4f46e5; }
-
-    /* ── Resultados ── */
     .resultados-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .resultados-count { font-size: 14px; color: #777; }
     .orden-select { padding: 7px 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 13px; outline: none; background: white; cursor: pointer; }
-
     .apuntes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-
     .apunte-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-decoration: none; color: inherit; display: block; transition: transform 0.2s, box-shadow 0.2s; }
     .apunte-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(79,70,229,0.12); }
     .apunte-materia { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4f46e5; background: #eef2ff; padding: 3px 8px; border-radius: 20px; display: inline-block; margin-bottom: 10px; }
@@ -60,19 +47,17 @@
     .apunte-autor { display: flex; align-items: center; gap: 6px; }
     .apunte-autor img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
     .apunte-stats { display: flex; gap: 10px; }
-
     .estado { text-align: center; padding: 60px 20px; color: #999; font-size: 15px; }
     .loading { text-align: center; padding: 60px 20px; color: #999; font-size: 15px; }
   </style>
 </head>
 <body>
-
   <nav>
     <a class="nav-logo" href="index.html">📚 Friendnote</a>
     <div class="nav-links">
-      <a href="index.html">Inicio</a>
-      <a href="explorar.html" class="activo">Explorar</a>
-      <a href="subir.html">Subir</a>
+      <a href="index.html" data-i18n="nav_inicio">Inicio</a>
+      <a href="explorar.html" class="activo" data-i18n="nav_explorar">Explorar</a>
+      <a href="subir.html" data-i18n="nav_subir">+ Subir apunte</a>
       <img class="nav-avatar" id="user-avatar" src="https://ui-avatars.com/api/?name=U" alt="Perfil"
            onclick="window.location.href='perfil.html'"/>
     </div>
@@ -80,17 +65,17 @@
 
   <main>
     <div class="hero">
-      <h1>Explora apuntes universitarios</h1>
-      <p>Encuentra materiales de estudio de tu carrera y materia</p>
+      <h1 data-i18n="explorar_titulo">Explora apuntes universitarios</h1>
+      <p data-i18n="explorar_subtitulo">Encuentra materiales de estudio de tu carrera y materia</p>
       <div class="search-grande">
-        <input type="text" id="input-busqueda" placeholder="Buscar por título, materia..."/>
-        <button class="btn-buscar" id="btn-buscar">Buscar</button>
+        <input type="text" id="input-busqueda" data-i18n-placeholder="buscar_placeholder" placeholder="Buscar por título, materia..."/>
+        <button class="btn-buscar" id="btn-buscar" data-i18n="btn_buscar">Buscar</button>
       </div>
     </div>
 
     <div class="filtros">
       <select id="filtro-carrera">
-        <option value="">Todas las carreras</option>
+        <option value="" data-i18n="filtro_carreras">Todas las carreras</option>
         <option>Ingeniería de Sistemas</option>
         <option>Administración</option>
         <option>Derecho</option>
@@ -98,7 +83,6 @@
         <option>Psicología</option>
         <option>Otra</option>
       </select>
-
       <div class="filtros-tags">
         <span class="tag activo" data-materia="">Todas</span>
         <span class="tag" data-materia="Cálculo">Cálculo</span>
@@ -125,6 +109,7 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    import { insertarSelectorIdioma, t } from './js/i18n.js'
 
     const supabase = createClient(
       'https://ojwnvijcyrddpadyyoce.supabase.co',
@@ -139,6 +124,7 @@
         document.getElementById('user-avatar').src = user.user_metadata.avatar_url
       }
 
+      insertarSelectorIdioma()
       await cargarApuntes()
     }
 
@@ -146,34 +132,27 @@
     let busquedaTimer = null
 
     async function cargarApuntes() {
-      const busqueda = document.getElementById('input-busqueda').value.trim()
-      const carrera  = document.getElementById('filtro-carrera').value
-      const orden    = document.getElementById('orden-select').value
+      const busqueda  = document.getElementById('input-busqueda').value.trim()
+      const carrera   = document.getElementById('filtro-carrera').value
+      const orden     = document.getElementById('orden-select').value
       const container = document.getElementById('apuntes-container')
 
-      container.innerHTML = '<div class="loading">⏳ Cargando apuntes...</div>'
+      container.innerHTML = `<div class="loading">⏳ ${t('cargando')}</div>`
 
-      let query = supabase
-        .from('apuntes')
-        .select('*')
-        .order(orden, { ascending: false })
-
+      let query = supabase.from('apuntes').select('*').order(orden, { ascending: false })
       if (carrera)       query = query.eq('carrera', carrera)
       if (materiaActiva) query = query.eq('materia', materiaActiva)
       if (busqueda)      query = query.ilike('titulo', `%${busqueda}%`)
 
       const { data: apuntes, error } = await query
 
-      if (error) {
-        container.innerHTML = '<div class="estado">❌ Error al cargar apuntes.</div>'
-        return
-      }
+      if (error) { container.innerHTML = '<div class="estado">❌ Error al cargar apuntes.</div>'; return }
 
       document.getElementById('resultados-count').textContent =
         `${apuntes?.length ?? 0} apunte${apuntes?.length !== 1 ? 's' : ''} encontrado${apuntes?.length !== 1 ? 's' : ''}`
 
       if (!apuntes || apuntes.length === 0) {
-        container.innerHTML = '<div class="estado">📭 No se encontraron apuntes con esos filtros.</div>'
+        container.innerHTML = `<div class="estado">📭 ${t('sin_apuntes')}</div>`
         return
       }
 
@@ -187,27 +166,19 @@
               <img src="${a.usuario_avatar ?? `https://ui-avatars.com/api/?name=${a.usuario_nombre}`}" alt="${a.usuario_nombre}"/>
               ${a.usuario_nombre}
             </div>
-            <div class="apunte-stats">
-              ⭐ ${a.valoracion_promedio ?? '0'}
-              &nbsp;⬇️ ${a.total_descargas ?? 0}
-            </div>
+            <div class="apunte-stats">⭐ ${a.valoracion_promedio ?? '0'} &nbsp;⬇️ ${a.total_descargas ?? 0}</div>
           </div>
         </a>
       `).join('')
     }
 
-    // ── Eventos ──
     document.getElementById('input-busqueda').addEventListener('input', () => {
       clearTimeout(busquedaTimer)
       busquedaTimer = setTimeout(cargarApuntes, 400)
     })
-
     document.getElementById('btn-buscar').addEventListener('click', cargarApuntes)
-
     document.getElementById('filtro-carrera').addEventListener('change', cargarApuntes)
-
     document.getElementById('orden-select').addEventListener('change', cargarApuntes)
-
     document.querySelectorAll('.tag').forEach(tag => {
       tag.addEventListener('click', () => {
         document.querySelectorAll('.tag').forEach(t => t.classList.remove('activo'))
@@ -216,14 +187,11 @@
         cargarApuntes()
       })
     })
-
-    // Enter en el buscador
     document.getElementById('input-busqueda').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') cargarApuntes()
     })
 
     init()
   </script>
-
 </body>
 </html>

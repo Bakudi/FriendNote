@@ -3,121 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
   <meta name="description" content="Inicia sesión en Friendnote con tu cuenta de Google."/>
-<meta property="og:title" content="Iniciar sesión — Friendnote"/>
-<meta name="robots" content="noindex"/>
-
+  <meta property="og:title" content="Iniciar sesión — Friendnote"/>
+  <meta name="robots" content="noindex"/>
   <title>Friendnote — Iniciar sesión</title>
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/components.css"/>
   <style>
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f4f6fb;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    .login-card {
-      background: white;
-      border-radius: 16px;
-      padding: 48px 40px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      text-align: center;
-      max-width: 380px;
-      width: 100%;
-    }
-
-    .login-card h1 {
-      font-size: 28px;
-      color: #1a1a2e;
-      margin-bottom: 8px;
-    }
-
-    .login-card p {
-      color: #666;
-      margin-bottom: 32px;
-      font-size: 15px;
-    }
-
-    .btn-google {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      width: 100%;
-      padding: 14px;
-      border: 1.5px solid #ddd;
-      border-radius: 10px;
-      background: white;
-      font-size: 15px;
-      font-weight: 500;
-      color: #333;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-google:hover {
-      background: #f8f8f8;
-      border-color: #bbb;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    .btn-google img {
-      width: 20px;
-      height: 20px;
-    }
-
-    .divider {
-      margin: 24px 0;
-      color: #aaa;
-      font-size: 13px;
-    }
-
-    .logo {
-      font-size: 20px;
-      font-weight: 700;
-      color: #4f46e5;
-      margin-bottom: 24px;
-      display: block;
-    }
-
-    #mensaje-error {
-      display: none;
-      background: #fee2e2;
-      color: #dc2626;
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 13px;
-      margin-top: 16px;
-    }
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f4f6fb; font-family: 'Segoe UI', sans-serif; }
+    .login-card { background: white; border-radius: 16px; padding: 48px 40px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); text-align: center; max-width: 380px; width: 100%; }
+    .login-card h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; }
+    .login-card p { color: #666; margin-bottom: 32px; font-size: 15px; }
+    .btn-google { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 14px; border: 1.5px solid #ddd; border-radius: 10px; background: white; font-size: 15px; font-weight: 500; color: #333; cursor: pointer; transition: all 0.2s; }
+    .btn-google:hover { background: #f8f8f8; border-color: #bbb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .btn-google img { width: 20px; height: 20px; }
+    .logo { font-size: 20px; font-weight: 700; color: #4f46e5; margin-bottom: 24px; display: block; }
+    #mensaje-error { display: none; background: #fee2e2; color: #dc2626; border-radius: 8px; padding: 10px; font-size: 13px; margin-top: 16px; }
   </style>
 </head>
 <body>
-
   <div class="login-card">
     <span class="logo">📚 Friendnote</span>
-    <h1>Bienvenido</h1>
-    <p>Accede para compartir y encontrar apuntes universitarios</p>
-
+    <h1 data-i18n="login_titulo">Bienvenido</h1>
+    <p data-i18n="login_subtitulo">Accede para compartir y encontrar apuntes universitarios</p>
     <button class="btn-google" id="btn-login">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-      Continuar con Google
+      <span data-i18n="login_google">Continuar con Google</span>
     </button>
-
-    <div id="mensaje-error">
-      Ocurrió un error al iniciar sesión. Intenta de nuevo.
-    </div>
+    <div id="mensaje-error">Ocurrió un error al iniciar sesión. Intenta de nuevo.</div>
   </div>
 
   <script type="module">
     import { loginConGoogle, obtenerUsuario } from './js/auth.js'
+    import { insertarSelectorIdioma } from './js/i18n.js'
 
-    // Si ya hay sesión activa, redirigir al home
+    insertarSelectorIdioma()
+
     obtenerUsuario().then(user => {
       if (user) window.location.href = '/index.html'
     })
@@ -130,6 +51,5 @@
       }
     })
   </script>
-
 </body>
 </html>

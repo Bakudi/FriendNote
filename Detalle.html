@@ -38,8 +38,6 @@
     .pdf-preview { width: 100%; height: 500px; border: none; border-radius: 10px; background: #f4f6fb; }
     .loading { text-align: center; padding: 80px 20px; color: #999; font-size: 15px; }
     .error-msg { text-align: center; padding: 80px 20px; color: #dc2626; font-size: 15px; }
-
-    /* ── Propinas ── */
     .propina-section { margin-bottom: 12px; padding: 16px; background: #fafafa; border-radius: 10px; border: 1px solid #f0f0f0; }
     .propina-label { font-size: 13px; color: #777; margin-bottom: 10px; }
     .propina-btns { display: flex; gap: 8px; }
@@ -51,10 +49,9 @@
   </style>
 </head>
 <body>
-
   <nav>
     <a class="nav-logo" href="index.html">📚 Friendnote</a>
-    <a class="btn-volver" href="index.html">← Volver</a>
+    <a class="btn-volver" href="index.html">← <span data-i18n="nav_inicio">Inicio</span></a>
   </nav>
 
   <main id="contenido">
@@ -63,6 +60,7 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    import { insertarSelectorIdioma, t } from './js/i18n.js'
 
     const supabase = createClient(
       'https://ojwnvijcyrddpadyyoce.supabase.co',
@@ -73,15 +71,13 @@
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { window.location.href = '/login.html'; return }
 
+      insertarSelectorIdioma()
+
       const params = new URLSearchParams(window.location.search)
       const id = params.get('id')
       if (!id) { window.location.href = '/index.html'; return }
 
-      const { data: apunte, error } = await supabase
-        .from('apuntes')
-        .select('*')
-        .eq('id', id)
-        .single()
+      const { data: apunte, error } = await supabase.from('apuntes').select('*').eq('id', id).single()
 
       if (error || !apunte) {
         document.getElementById('contenido').innerHTML = '<div class="error-msg">❌ Apunte no encontrado.</div>'
@@ -107,12 +103,12 @@
           </div>
 
           <a class="btn-descargar" href="${apunte.archivo_url}" target="_blank" id="btn-descargar">
-            ⬇️ Descargar apunte
+            ${t('btn_descargar')}
           </a>
 
           ${!esDueno ? `
             <div class="propina-section">
-              <div class="propina-label">🎁 ¿Te fue muy útil? Dale una propina al autor:</div>
+              <div class="propina-label">${t('propina_label')}</div>
               <div class="propina-btns">
                 <button class="btn-propina" data-monto="500">$500</button>
                 <button class="btn-propina" data-monto="1000">$1.000</button>
@@ -123,7 +119,7 @@
           ` : ''}
 
           <button class="btn-eliminar ${esDueno ? 'visible' : ''}" id="btn-eliminar">
-            🗑️ Eliminar apunte
+            ${t('btn_eliminar')}
           </button>
         </div>
 
@@ -132,7 +128,7 @@
         </div>
 
         <div class="card card-valoracion">
-          <h3>¿Te fue útil este apunte?</h3>
+          <h3>${t('valoracion_titulo')}</h3>
           <div class="estrellas" id="estrellas">
             <span class="estrella" data-val="1">⭐</span>
             <span class="estrella" data-val="2">⭐</span>
@@ -140,47 +136,32 @@
             <span class="estrella" data-val="4">⭐</span>
             <span class="estrella" data-val="5">⭐</span>
           </div>
-          <p class="valoracion-actual" id="valoracion-actual">Selecciona una valoración</p>
-          <button class="btn-valorar" id="btn-valorar">Enviar valoración</button>
+          <p class="valoracion-actual" id="valoracion-actual">${t('valoracion_placeholder')}</p>
+          <button class="btn-valorar" id="btn-valorar">${t('btn_valorar')}</button>
           <div class="mensaje-valoracion" id="msg-valoracion"></div>
         </div>
       `
 
-      // ── Registrar descarga ──
       document.getElementById('btn-descargar').addEventListener('click', async () => {
-        await supabase
-          .from('apuntes')
-          .update({ total_descargas: (apunte.total_descargas ?? 0) + 1 })
-          .eq('id', id)
+        await supabase.from('apuntes').update({ total_descargas: (apunte.total_descargas ?? 0) + 1 }).eq('id', id)
       })
 
-      // ── Eliminar apunte ──
       document.getElementById('btn-eliminar')?.addEventListener('click', async () => {
         if (!confirm('¿Estás seguro de que quieres eliminar este apunte?')) return
         const { error } = await supabase.from('apuntes').delete().eq('id', id)
         if (!error) window.location.href = '/index.html'
       })
 
-      // ── Propinas ──
       if (!esDueno) {
         document.querySelectorAll('.btn-propina').forEach(btn => {
           btn.addEventListener('click', async () => {
             const monto = parseInt(btn.dataset.monto)
             const msgEl = document.getElementById('msg-propina')
 
-            // Obtener o crear saldo del autor
-            let { data: saldoAutor } = await supabase
-              .from('saldos')
-              .select('*')
-              .eq('usuario_id', apunte.usuario_id)
-              .single()
+            let { data: saldoAutor } = await supabase.from('saldos').select('*').eq('usuario_id', apunte.usuario_id).single()
 
             if (!saldoAutor) {
-              await supabase.from('saldos').insert([{
-                usuario_id: apunte.usuario_id,
-                saldo_total: monto,
-                saldo_disponible: monto
-              }])
+              await supabase.from('saldos').insert([{ usuario_id: apunte.usuario_id, saldo_total: monto, saldo_disponible: monto }])
             } else {
               await supabase.from('saldos').update({
                 saldo_total: saldoAutor.saldo_total + monto,
@@ -188,7 +169,6 @@
               }).eq('usuario_id', apunte.usuario_id)
             }
 
-            // Registrar transacción
             await supabase.from('transacciones').insert([{
               usuario_id: apunte.usuario_id,
               apunte_id: apunte.id,
@@ -197,7 +177,6 @@
               descripcion: `Propina por "${apunte.titulo}"`
             }])
 
-            // Deshabilitar botones tras propina
             document.querySelectorAll('.btn-propina').forEach(b => b.disabled = true)
             msgEl.textContent = `✅ ¡Propina de $${monto.toLocaleString('es-CO')} COP enviada!`
             msgEl.className = 'msg-propina exito'
@@ -205,7 +184,6 @@
         })
       }
 
-      // ── Sistema de estrellas ──
       let estrellaSeleccionada = 0
       const estrellas = document.querySelectorAll('.estrella')
 
@@ -224,30 +202,20 @@
         })
       })
 
-      // ── Enviar valoración ──
       document.getElementById('btn-valorar').addEventListener('click', async () => {
         if (!estrellaSeleccionada) {
           mostrarMsgValoracion('Selecciona una cantidad de estrellas primero.', 'error')
           return
         }
-
-        const { data: existente } = await supabase
-          .from('valoraciones')
-          .select('id')
-          .eq('apunte_id', id)
-          .eq('usuario_id', user.id)
-          .single()
-
+        const { data: existente } = await supabase.from('valoraciones').select('id').eq('apunte_id', id).eq('usuario_id', user.id).single()
         if (existente) {
           await supabase.from('valoraciones').update({ estrellas: estrellaSeleccionada }).eq('id', existente.id)
         } else {
           await supabase.from('valoraciones').insert([{ apunte_id: id, usuario_id: user.id, estrellas: estrellaSeleccionada }])
         }
-
         const { data: vals } = await supabase.from('valoraciones').select('estrellas').eq('apunte_id', id)
         const promedio = vals.reduce((acc, v) => acc + v.estrellas, 0) / vals.length
         await supabase.from('apuntes').update({ valoracion_promedio: parseFloat(promedio.toFixed(1)) }).eq('id', id)
-
         mostrarMsgValoracion('✅ ¡Valoración enviada correctamente!', 'exito')
       })
     }
@@ -260,6 +228,5 @@
 
     init()
   </script>
-
 </body>
 </html>

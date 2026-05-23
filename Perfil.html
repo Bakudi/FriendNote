@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
   <meta name="description" content="Tu perfil en Friendnote. Revisa tus apuntes subidos, descargas y valoraciones recibidas."/>
-<meta property="og:title" content="Mi perfil — Friendnote"/>
-<meta name="robots" content="noindex"/>
-
+  <meta property="og:title" content="Mi perfil — Friendnote"/>
+  <meta name="robots" content="noindex"/>
   <title>Friendnote — Mi perfil</title>
   <link rel="stylesheet" href="css/main.css"/>
   <link rel="stylesheet" href="css/components.css"/>
@@ -18,10 +16,7 @@
     .nav-logo { font-size: 20px; font-weight: 700; color: #4f46e5; text-decoration: none; }
     .btn-logout { font-size: 14px; color: #dc2626; background: none; border: 1.5px solid #dc2626; padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
     .btn-logout:hover { background: #fee2e2; }
-
     main { max-width: 720px; margin: 0 auto; padding: 40px 16px; }
-
-    /* ── Header perfil ── */
     .perfil-header { background: white; border-radius: 16px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px; display: flex; align-items: center; gap: 24px; }
     .perfil-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #e0e0ff; }
     .perfil-info h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
@@ -30,31 +25,24 @@
     .stat { text-align: center; }
     .stat-numero { font-size: 22px; font-weight: 700; color: #4f46e5; }
     .stat-label { font-size: 12px; color: #999; }
-
-    /* ── Sección apuntes ── */
     .seccion-titulo { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
-
     .apuntes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-
     .apunte-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-decoration: none; color: inherit; display: block; transition: transform 0.2s, box-shadow 0.2s; }
     .apunte-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(79,70,229,0.12); }
     .apunte-materia { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #4f46e5; background: #eef2ff; padding: 3px 8px; border-radius: 20px; display: inline-block; margin-bottom: 10px; }
     .apunte-titulo { font-size: 15px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
     .apunte-footer { display: flex; justify-content: space-between; font-size: 12px; color: #999; margin-top: 12px; }
-
     .estado { text-align: center; padding: 60px 20px; color: #999; }
     .loading { text-align: center; padding: 60px 20px; color: #999; }
-
     .btn-subir { display: inline-flex; align-items: center; gap: 8px; background: #4f46e5; color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 500; margin-bottom: 20px; transition: background 0.2s; }
     .btn-subir:hover { background: #4338ca; }
   </style>
 </head>
 <body>
-
   <nav>
     <a class="nav-logo" href="index.html">📚 Friendnote</a>
-    <a href="ganancias.html" style="font-size:14px;color:#4f46e5;text-decoration:none;margin-right:16px;">💰 Mis ganancias</a>
-    <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+    <a href="ganancias.html" style="font-size:14px;color:#4f46e5;text-decoration:none;margin-right:16px;" data-i18n="nav_ganancias">💰 Mis ganancias</a>
+    <button class="btn-logout" id="btn-logout" data-i18n="nav_logout">Cerrar sesión</button>
   </nav>
 
   <main>
@@ -64,6 +52,7 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    import { insertarSelectorIdioma, t } from './js/i18n.js'
 
     const supabase = createClient(
       'https://ojwnvijcyrddpadyyoce.supabase.co',
@@ -74,19 +63,16 @@
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { window.location.href = '/login.html'; return }
 
-      // Cargar apuntes del usuario
+      insertarSelectorIdioma()
+
       const { data: apuntes } = await supabase
-        .from('apuntes')
-        .select('*')
-        .eq('usuario_id', user.id)
-        .order('created_at', { ascending: false })
+        .from('apuntes').select('*').eq('usuario_id', user.id).order('created_at', { ascending: false })
 
       const totalDescargas = apuntes?.reduce((acc, a) => acc + (a.total_descargas ?? 0), 0) ?? 0
       const promedioGeneral = apuntes?.length
         ? (apuntes.reduce((acc, a) => acc + (a.valoracion_promedio ?? 0), 0) / apuntes.length).toFixed(1)
         : '—'
 
-      // Renderizar header
       document.getElementById('perfil-header').outerHTML = `
         <div class="perfil-header">
           <img class="perfil-avatar"
@@ -98,27 +84,26 @@
             <div class="perfil-stats">
               <div class="stat">
                 <div class="stat-numero">${apuntes?.length ?? 0}</div>
-                <div class="stat-label">Apuntes</div>
+                <div class="stat-label">${t('perfil_apuntes')}</div>
               </div>
               <div class="stat">
                 <div class="stat-numero">${totalDescargas}</div>
-                <div class="stat-label">Descargas</div>
+                <div class="stat-label">${t('perfil_descargas')}</div>
               </div>
               <div class="stat">
                 <div class="stat-numero">${promedioGeneral}</div>
-                <div class="stat-label">Promedio ⭐</div>
+                <div class="stat-label">${t('perfil_promedio')}</div>
               </div>
             </div>
           </div>
         </div>
       `
 
-      // Renderizar apuntes
       const seccion = document.getElementById('apuntes-section')
 
       if (!apuntes || apuntes.length === 0) {
         seccion.innerHTML = `
-          <a class="btn-subir" href="subir.html">+ Subir primer apunte</a>
+          <a class="btn-subir" href="subir.html">+ ${t('nav_subir')}</a>
           <div class="estado">📭 Aún no has subido ningún apunte.</div>
         `
         return
@@ -126,8 +111,8 @@
 
       seccion.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <div class="seccion-titulo">Mis apuntes</div>
-          <a class="btn-subir" href="subir.html">+ Subir apunte</a>
+          <div class="seccion-titulo">${t('mis_apuntes')}</div>
+          <a class="btn-subir" href="subir.html">+ ${t('nav_subir')}</a>
         </div>
         <div class="apuntes-grid">
           ${apuntes.map(a => `
@@ -145,7 +130,6 @@
       `
     }
 
-    // Cerrar sesión
     document.getElementById('btn-logout').addEventListener('click', async () => {
       await supabase.auth.signOut()
       window.location.href = '/login.html'
@@ -153,6 +137,5 @@
 
     init()
   </script>
-
 </body>
 </html>

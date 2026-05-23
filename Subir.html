@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
   <meta name="description" content="Sube tus apuntes universitarios y compártelos con la comunidad. Gana propinas por cada descarga."/>
-<meta property="og:title" content="Subir apunte — Friendnote"/>
-<link rel="canonical" href="https://friendnote.app/subir.html"/>
-
+  <meta property="og:title" content="Subir apunte — Friendnote"/>
+  <link rel="canonical" href="https://friendnote.app/subir.html"/>
   <title>Friendnote — Subir apunte</title>
   <link rel="stylesheet" href="css/main.css"/>
   <link rel="stylesheet" href="css/components.css"/>
@@ -49,29 +47,28 @@
   </style>
 </head>
 <body>
-
   <nav>
     <a class="nav-logo" href="index.html">📚 Friendnote</a>
-    <a class="btn-volver" href="index.html">← Volver al inicio</a>
+    <a class="btn-volver" href="index.html">← <span data-i18n="nav_inicio">Inicio</span></a>
   </nav>
 
   <main>
-    <h1>Subir apunte</h1>
-    <p class="subtitulo">Comparte tu material de estudio con la comunidad</p>
+    <h1 data-i18n="subir_titulo">Subir apunte</h1>
+    <p class="subtitulo" data-i18n="subir_subtitulo">Comparte tu material de estudio con la comunidad</p>
 
     <div class="form-group">
-      <label>Título <span>*</span></label>
+      <label><span data-i18n="label_titulo">Título</span> <span>*</span></label>
       <input type="text" id="titulo" placeholder="Ej: Resumen Cálculo Diferencial — Parcial 2"/>
     </div>
 
     <div class="form-group">
-      <label>Descripción</label>
+      <label data-i18n="label_descripcion">Descripción</label>
       <textarea id="descripcion" placeholder="¿Qué temas cubre este apunte?"></textarea>
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label>Carrera <span>*</span></label>
+        <label><span data-i18n="label_carrera">Carrera</span> <span>*</span></label>
         <select id="carrera">
           <option value="">Seleccionar...</option>
           <option>Ingeniería de Sistemas</option>
@@ -83,17 +80,17 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Materia <span>*</span></label>
+        <label><span data-i18n="label_materia">Materia</span> <span>*</span></label>
         <input type="text" id="materia" placeholder="Ej: Cálculo Diferencial"/>
       </div>
     </div>
 
     <div class="form-group">
-      <label>Archivo PDF <span>*</span></label>
+      <label><span data-i18n="label_archivo">Archivo PDF</span> <span>*</span></label>
       <div class="drop-zone" id="drop-zone" onclick="document.getElementById('archivo').click()">
         <div class="icono">📄</div>
-        <p>Arrastra tu PDF aquí o haz clic para seleccionarlo</p>
-        <small>Solo archivos PDF — máximo 10MB</small>
+        <p data-i18n="drop_texto">Arrastra tu PDF aquí o haz clic para seleccionarlo</p>
+        <small data-i18n="drop_limite">Solo archivos PDF — máximo 10MB</small>
         <input type="file" id="archivo" accept=".pdf"/>
       </div>
       <div class="archivo-seleccionado" id="archivo-info">
@@ -101,7 +98,7 @@
       </div>
     </div>
 
-    <button class="btn-submit" id="btn-submit">Subir apunte</button>
+    <button class="btn-submit" id="btn-submit" data-i18n="btn_subir_apunte">Subir apunte</button>
 
     <div class="progreso-container" id="progreso-container">
       <div class="progreso-bar">
@@ -115,17 +112,18 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    import { insertarSelectorIdioma, t } from './js/i18n.js'
 
     const SUPABASE_URL = 'https://ojwnvijcyrddpadyyoce.supabase.co'
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qd252aWpjeXJkZHBhZHl5b2NlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0ODUxNzcsImV4cCI6MjA5NTA2MTE3N30.Lg-NuNcwWcI8hwmost-TtJQ0YzlSDTZE2ciL9BtK0yQ'
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-    // Verificar sesión
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { window.location.href = '/login.html'; }
+    if (!user) { window.location.href = '/login.html' }
 
-    // ── Drag & Drop ──
-    const dropZone    = document.getElementById('drop-zone')
+    insertarSelectorIdioma()
+
+    const dropZone     = document.getElementById('drop-zone')
     const inputArchivo = document.getElementById('archivo')
     const archivoInfo  = document.getElementById('archivo-info')
     const archivoNombre = document.getElementById('archivo-nombre')
@@ -151,7 +149,6 @@
       archivoInfo.classList.add('visible')
     }
 
-    // ── Submit ──
     document.getElementById('btn-submit').addEventListener('click', async () => {
       const titulo      = document.getElementById('titulo').value.trim()
       const descripcion = document.getElementById('descripcion').value.trim()
@@ -174,38 +171,23 @@
       mostrarProgreso(true, 30, 'Subiendo archivo...')
 
       try {
-        // 1. Subir PDF a Storage
         const nombreArchivo = `${user.id}_${Date.now()}_${archivo.name}`
-        const { error: storageError } = await supabase.storage
-          .from('apuntes')
-          .upload(nombreArchivo, archivo)
-
+        const { error: storageError } = await supabase.storage.from('apuntes').upload(nombreArchivo, archivo)
         if (storageError) throw storageError
 
         mostrarProgreso(true, 60, 'Guardando información...')
 
-        // 2. Obtener URL pública
-        const { data: urlData } = supabase.storage
-          .from('apuntes')
-          .getPublicUrl(nombreArchivo)
+        const { data: urlData } = supabase.storage.from('apuntes').getPublicUrl(nombreArchivo)
 
-        // 3. Insertar en tabla
-        const { data, error } = await supabase
-          .from('apuntes')
-          .insert([{
-            titulo,
-            descripcion,
-            materia,
-            carrera,
-            archivo_url:         urlData.publicUrl,
-            usuario_id:          user.id,
-            usuario_nombre:      user.user_metadata?.full_name  ?? 'Anónimo',
-            usuario_avatar:      user.user_metadata?.avatar_url ?? null,
-            valoracion_promedio: 0,
-            total_descargas:     0,
-          }])
-          .select()
-          .single()
+        const { data, error } = await supabase.from('apuntes').insert([{
+          titulo, descripcion, materia, carrera,
+          archivo_url:         urlData.publicUrl,
+          usuario_id:          user.id,
+          usuario_nombre:      user.user_metadata?.full_name  ?? 'Anónimo',
+          usuario_avatar:      user.user_metadata?.avatar_url ?? null,
+          valoracion_promedio: 0,
+          total_descargas:     0,
+        }]).select().single()
 
         if (error) throw error
 
@@ -217,7 +199,7 @@
         console.error('Error:', err.message)
         mostrarMensaje(`Error: ${err.message}`, 'error')
         btn.disabled = false
-        btn.textContent = 'Subir apunte'
+        btn.textContent = t('btn_subir_apunte')
         mostrarProgreso(false, 0, '')
       }
     })
@@ -235,6 +217,5 @@
       el.className = `mensaje ${tipo}`
     }
   </script>
-
 </body>
 </html>
